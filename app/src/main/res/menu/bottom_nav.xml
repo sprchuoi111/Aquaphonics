@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/active_sensor"
+        android:title="@string/sensor"
+        android:icon="@drawable/sensors"/>
+    <item
+        android:id="@+id/active_actuator"
+        android:title="@string/actuator"
+        android:icon="@drawable/relay"/>
+    <item
+        android:id="@+id/active_timer"
+        android:title="@string/timer"
+        android:icon="@drawable/timer" />
+</menu>
