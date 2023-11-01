@@ -1,5 +1,7 @@
 package com.example.aquasys;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,13 +11,23 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.example.aquasys.login.Login;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -30,11 +42,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DrawerLayout drawer_layout; // Declare a DrawerLayout variable.
     private Toolbar toolbar; // Declare a Toolbar variable.
+    //Firebase
+    private FirebaseUser user;
+    private FirebaseAuth auth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        // Check Internet Connection
+
+        while(!isNetworkConnected() && !InternetIsConnected()){
+            Toast.makeText(MainActivity.this,"No internet Connection" ,Toast.LENGTH_LONG).show();
+        }
+        Toast.makeText(MainActivity.this,"Internet Connected" ,Toast.LENGTH_LONG).show();
+        // Check if the user is authenticated
+        getUserInformation();
         bottom_navi = findViewById(R.id.bottom_navi); // Find the BottomNavigationView in the layout.
         mViewPager = findViewById(R.id.view_pager); // Find the ViewPager2 in the layout.
         drawer_layout = findViewById(R.id.drawer_layout); // Find the DrawerLayout in the layout
@@ -72,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+
         // Set up a callback for ViewPager page changes.
         mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -98,7 +125,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+    // Manage user information
+    private void getUserInformation(){
 
+        // Method to check user authentication and redirect to the login page if necessary
+        auth= FirebaseAuth.getInstance();
+        // get user
+        user = auth.getCurrentUser();
+
+        if(user ==null){
+            // User is not logged in, so redirect to the login page
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            startActivity(intent);
+            finish();
+        }
+    }
     // Set up the ViewPager with an adapter.
     private void setUpViewPager() {
         viewPagerAdapter mViewPagerAdapter = new viewPagerAdapter(this);
@@ -119,6 +160,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.active_timer) {
             openTimerFragment();
             bottom_navi.getMenu().findItem(R.id.active_timer).setChecked(true);
+        } else if (id == R.id.logout) {
+            // Sign out the user and redirect to the login page
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            startActivity(intent);
+            Toast.makeText(MainActivity.this, "Logout success", Toast.LENGTH_SHORT).show();
+            finish();
         }
 
         drawer_layout.closeDrawer(GravityCompat.START); // Close the navigation drawer.
@@ -168,4 +216,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             super.onBackPressed();
         }
     }
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
+    }
+    // check internet ping to gg
+    public boolean InternetIsConnected() {
+        try {
+            String command = "ping -c 1 google.com";
+            return (Runtime.getRuntime().exec(command).waitFor() == 0);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }

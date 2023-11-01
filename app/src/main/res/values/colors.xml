@@ -4,4 +4,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="active_nav">#E9B824</color>
     <color name="blue">#362FD9</color>
+    <color name="purple" >#3B42FC</color>
+    <color name="red">#D80032</color>
+    <color name="green">#D2DE32</color>
 </resources>

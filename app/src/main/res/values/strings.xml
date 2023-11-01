@@ -20,5 +20,12 @@
     <string name="valsensor">Value Sensor</string>
     <string name="navigation_drawer_open">Open Navigation</string>
     <string name="navigation_drawer_close">Close Navigation</string>
+    <string name="duration">Duration</string>
+    <string name="usr">User Name</string>
+    <string name="password">Password</string>
+    <string name="forgot_pass">Forgot password</string>
+    <string name="email">Email</string>
+    <string name="reset_pass">Reset Password</string>
+
 
 </resources>

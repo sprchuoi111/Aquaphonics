@@ -2,7 +2,6 @@ package com.example.aquasys.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.RoundedCorner;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -15,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
 import com.example.aquasys.listener.SelectListener;
-import com.example.aquasys.sensor.sensor;
+import com.example.aquasys.object.sensor;
 
 import java.util.List;
 

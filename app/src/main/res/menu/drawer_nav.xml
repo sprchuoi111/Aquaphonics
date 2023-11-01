@@ -23,7 +23,7 @@
                 android:title="@string/change_password"
                 android:icon="@drawable/lock_reset_24px" />
             <item
-                android:id="@+id/my_profile"
+                android:id="@+id/logout"
                 android:title="@string/logout"
                 android:icon="@drawable/logout_40px" />
         </menu>

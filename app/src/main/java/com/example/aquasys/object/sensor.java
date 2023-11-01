@@ -1,4 +1,4 @@
-package com.example.aquasys.sensor;
+package com.example.aquasys.object;
 
 import com.example.aquasys.R;
 
@@ -57,7 +57,5 @@ public class sensor {
         globalSensor.add(4 , new sensor("Light Sensor","0" , R.drawable.light_mode) );
         globalSensor.add(5 , new sensor("Moisture Humi","0" , R.drawable.soil) );
         return globalSensor;
-
-
     }
 }
