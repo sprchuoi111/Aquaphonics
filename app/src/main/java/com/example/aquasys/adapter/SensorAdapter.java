@@ -76,4 +76,5 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.SensorView
 
         }
     }
+
 }

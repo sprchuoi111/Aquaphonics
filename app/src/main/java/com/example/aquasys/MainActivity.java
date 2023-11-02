@@ -23,11 +23,14 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.aquasys.login.Login;
+import com.example.aquasys.object.sensor;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -45,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //Firebase
     private FirebaseUser user;
     private FirebaseAuth auth;
-
+    private DatabaseReference mDatabaseSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +127,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
+
+        mDatabaseSensor = FirebaseDatabase.getInstance().getReference().child("Sensors");
     }
     // Manage user information
     private void getUserInformation(){
@@ -230,5 +235,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return false;
         }
     }
+
+    // save sensor to firebase
+    public void addSensorToFireBase(){
+        mDatabaseSensor.setValue(sensor.listSensor()).addOnSuccessListener(aVoid -> {
+                    // Data has been saved successfully
+                    Toast.makeText(MainActivity.this, "Save complete", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any errors
+                    Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
+                });
+    }
+
 
 }

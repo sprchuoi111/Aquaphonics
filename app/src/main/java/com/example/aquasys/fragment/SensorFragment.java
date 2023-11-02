@@ -9,12 +9,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
 import com.example.aquasys.adapter.SensorAdapter;
 import com.example.aquasys.listener.SelectListener;
 import com.example.aquasys.object.sensor;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SensorFragment extends Fragment {
 
@@ -24,14 +27,18 @@ public class SensorFragment extends Fragment {
 
     private View mView; // A reference to the main view of the fragment.
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
-    //overide Onresume method when changing the fragment
+    //override Onresume method when changing the fragment
     @Override
     public void onResume() {
         super.onResume();
+        //Load sensor to firebase
+        mMainActivity.addSensorToFireBase();
         sensorAdapter.notifyDataSetChanged(); // re-change data base on resume method
 
     }
@@ -53,6 +60,9 @@ public class SensorFragment extends Fragment {
             }
         });
         recyclerview_sensor.setAdapter(sensorAdapter);
+
         return mView;
     }
+
+
 }
