@@ -13,4 +13,5 @@ Done : public sensor to git , data processing ( Schedule , Actuator , data of se
 
 Login : 
 UID : quangbinhlxcity@gmail.com
-pass : admin123
+
+Pass : admin123
