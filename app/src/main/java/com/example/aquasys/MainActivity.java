@@ -11,26 +11,43 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.aquasys.adapter.SensorAdapter;
+import com.example.aquasys.adapter.TimerAdapter;
 import com.example.aquasys.login.Login;
 import com.example.aquasys.object.sensor;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -48,8 +65,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //Firebase
     private FirebaseUser user;
     private FirebaseAuth auth;
-    private DatabaseReference mDatabaseSensor;
+     public DatabaseReference mDatabaseSensor;
 
+    private SensorAdapter sensorAdapter;
+     BroadcastReceiver broadcastReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,11 +76,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         // Check Internet Connection
-
-        while(!isNetworkConnected() && !InternetIsConnected()){
-            Toast.makeText(MainActivity.this,"No internet Connection" ,Toast.LENGTH_LONG).show();
-        }
-        Toast.makeText(MainActivity.this,"Internet Connected" ,Toast.LENGTH_LONG).show();
+        // create broadcast receiver
+        broadcastReceiver = new NetworkChangeReceiver();
+        registerNetworkBroadcastReceiver();
         // Check if the user is authenticated
         getUserInformation();
         bottom_navi = findViewById(R.id.bottom_navi); // Find the BottomNavigationView in the layout.
@@ -72,6 +89,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Set up the Toolbar and connect it to the ActionBar.
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        // Right side button toolbar
+        Button btn_update = new Button(this);
+        btn_update.setBackgroundResource(R.drawable.update);
+        Toolbar.LayoutParams l3 = new Toolbar.LayoutParams(Toolbar.LayoutParams.WRAP_CONTENT, Toolbar.LayoutParams.WRAP_CONTENT);
+        btn_update.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+        l3.gravity = Gravity.END;
+        l3.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics()); // Set width to 60dp
+        l3.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics()); // Set height to 60dp
+        btn_update.setLayoutParams(l3);
+
+
+        toolbar.addView(btn_update);
+
+        btn_update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addSensorToFireBase();
+            }
+        });
 
         // Create an ActionBarDrawerToggle for syncing the ActionBar with the DrawerLayout.
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer_layout, toolbar,
@@ -129,6 +165,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         mDatabaseSensor = FirebaseDatabase.getInstance().getReference().child("Sensors");
+
+
+
+// ...
+
+// Assuming you have a reference to the Firebase Realtime Database
     }
     // Manage user information
     private void getUserInformation(){
@@ -237,8 +279,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // save sensor to firebase
+
     public void addSensorToFireBase(){
-        mDatabaseSensor.setValue(sensor.listSensor()).addOnSuccessListener(aVoid -> {
+       mDatabaseSensor.setValue(sensor.listSensor()).addOnSuccessListener(aVoid -> {
                     // Data has been saved successfully
                     Toast.makeText(MainActivity.this, "Save complete", Toast.LENGTH_SHORT).show();
                 })
@@ -246,6 +289,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     // Handle any errors
                     Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    // MetWork processing when occur error connection
+    // register Network
+    protected void registerNetworkBroadcastReceiver(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        }
+
+    }
+    protected void unregisterNetwork(){
+        try {
+            unregisterReceiver(broadcastReceiver);
+        }
+        catch (IllegalArgumentException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterNetwork();
     }
 
 
