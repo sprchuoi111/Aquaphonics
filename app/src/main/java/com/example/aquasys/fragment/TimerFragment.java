@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,11 +23,16 @@ import android.widget.ToggleButton;
 
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
+import com.example.aquasys.adapter.ActuatorAdapter;
 import com.example.aquasys.adapter.TimerAdapter;
+import com.example.aquasys.listener.SelectListenerActuator;
 import com.example.aquasys.listener.SelectListenerTimer;
 import com.example.aquasys.object.actuator;
 import com.example.aquasys.object.timer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -203,6 +209,7 @@ public class TimerFragment extends Fragment {
                         timer.globalTimer.add(0, new timer(temp_act, hourFrom, minuteFrom, hourTo, minuteTo));
                         recyclerview_timer.setAdapter(timerAdapter);
                         dialog.cancel();
+                        mMainActivity.addScheduleToFireBase();
                     } else {
                         // Display a toast when the conditions are not met
                         Toast.makeText(getContext(), "Please choose again!!", Toast.LENGTH_SHORT).show();
@@ -212,6 +219,30 @@ public class TimerFragment extends Fragment {
                     Toast.makeText(getContext(), "Actuator is null. Please choose again!!", Toast.LENGTH_SHORT).show();
                 }
 
+
+            }
+        });
+
+    }
+
+    private void ReadScheduleData(final String TimerName, final int TimerIndex) {
+        mMainActivity.mDatabaseActuator.child(String.valueOf(TimerIndex)).child("status").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int status = snapshot.getValue(int.class);
+                timer.globalTimer.get(TimerIndex).setStatus(status);
+                // set list for sensor adapter
+                actuatorAdapter = new ActuatorAdapter(actuator.listActuator(), new SelectListenerActuator() {
+                    @Override
+                    public void onClickItemActuator(actuator act, int position) {
+                    }
+                });
+                recyclerViewActuator.setAdapter(actuatorAdapter);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });

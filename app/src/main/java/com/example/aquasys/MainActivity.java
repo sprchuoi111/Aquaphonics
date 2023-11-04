@@ -302,7 +302,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void addActuatorToFireBase(){
         mDatabaseActuator.setValue(actuator.listActuator()).addOnSuccessListener(aVoid -> {
                     // Data has been saved successfully
-                    Toast.makeText(MainActivity.this, "Save complete", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
                     // Handle any errors

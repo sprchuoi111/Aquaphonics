@@ -41,7 +41,7 @@ public class ActuatorFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        actuatorAdapter.notifyDataSetChanged(); // re-change data base on resume method
+        //actuatorAdapter.notifyDataSetChanged(); // re-change data base on resume method
 
     }
 
@@ -76,11 +76,9 @@ public class ActuatorFragment extends Fragment {
                 actuatorAdapter = new ActuatorAdapter(actuator.listActuator(), new SelectListenerActuator() {
                     @Override
                     public void onClickItemActuator(actuator act, int position) {
-                        Toast.makeText(mMainActivity, act.getName(), Toast.LENGTH_SHORT).show();
                     }
                 });
                 recyclerViewActuator.setAdapter(actuatorAdapter);
-                Toast.makeText(mMainActivity, ActuatorName + " Data Received : " +sensor.listSensor().get(actuatorIndex).getStatus(), Toast.LENGTH_SHORT).show();
 
             }
 
@@ -90,5 +88,5 @@ public class ActuatorFragment extends Fragment {
             }
         });
 
-        }
+    }
 }

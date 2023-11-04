@@ -77,6 +77,7 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                                     // Remove the room at 'currentPosition' from mListRoom.
                                     timerList.remove(currentPosition);
                                     notifyDataSetChanged();
+                                    holder.mMainActivity.addScheduleToFireBase();
                                 }
                             }
                         })
@@ -132,6 +133,7 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                             timerList.get(currentPosition).setTime_stop_hour(hourTo);
                             timerList.get(currentPosition).setTime_stop_minute(minuteTo);
                             notifyDataSetChanged();
+                            holder.mMainActivity.addScheduleToFireBase();
                         } else {
                             // Display a toast when the conditions are not met
                             Toast.makeText(holder.mMainActivity, "Please choose again!!", Toast.LENGTH_SHORT).show();

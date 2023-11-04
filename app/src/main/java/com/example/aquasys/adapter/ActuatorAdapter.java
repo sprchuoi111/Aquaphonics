@@ -71,11 +71,15 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
                         holder.card_actuator.setCardBackgroundColor(purpleColor);
                         act.setStatus(1);
                         Toast.makeText(holder.mMainActivity, "Duration: " + String.format("%02d:%02d", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
+                        //save actuator to firebase
+                        holder.mMainActivity.addActuatorToFireBase();
                     }
                 }
                 else {
                     holder.card_actuator.setCardBackgroundColor(whiteColor);
                     act.setStatus(0);
+                    //save actuator to firebase
+                    holder.mMainActivity.addActuatorToFireBase();
                 }
             }
         });
@@ -104,6 +108,8 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
                         // Set time for actuator
                         act.setHour(np_duration_hour.getValue());
                         act.setMinute(np_duration_minute.getValue());
+                        //save actuator to firebase
+                        holder.mMainActivity.addActuatorToFireBase();
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
