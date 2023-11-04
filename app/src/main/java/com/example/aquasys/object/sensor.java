@@ -48,14 +48,16 @@ public class sensor {
     public void setStatus(int status) {
         this.status = status;
     }
-    public static List<sensor> listSensor(){
-        List<sensor> globalSensor =new ArrayList<>();
-        globalSensor.add(0 , new sensor("Humidity", R.drawable.humidity_percentage) );
-        globalSensor.add(1 , new sensor("Temperature", R.drawable.device_thermostat) );
-        globalSensor.add(2 , new sensor("Water level",R.drawable.water_level) );
-        globalSensor.add(3 , new sensor("PH", R.drawable.ph) );
-        globalSensor.add(4 , new sensor("Light Sensor", R.drawable.light_mode) );
-        globalSensor.add(5 , new sensor("Moisture Humi", R.drawable.soil) );
+    private static List<sensor> globalSensor = new ArrayList<>();
+    public static List<sensor> listSensor() {
+        if (globalSensor.isEmpty()) {
+            globalSensor.add(new sensor("Humidity", R.drawable.humidity_percentage));
+            globalSensor.add(new sensor("Temperature", R.drawable.device_thermostat));
+            globalSensor.add(new sensor("Water level", R.drawable.water_level));
+            globalSensor.add(new sensor("PH", R.drawable.ph));
+            globalSensor.add(new sensor("Light Sensor", R.drawable.light_mode));
+            globalSensor.add(new sensor("Moisture Humi", R.drawable.soil));
+        }
         return globalSensor;
     }
 }

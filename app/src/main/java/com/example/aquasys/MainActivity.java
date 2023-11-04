@@ -33,7 +33,9 @@ import android.widget.Toast;
 import com.example.aquasys.adapter.SensorAdapter;
 import com.example.aquasys.adapter.TimerAdapter;
 import com.example.aquasys.login.Login;
+import com.example.aquasys.object.actuator;
 import com.example.aquasys.object.sensor;
+import com.example.aquasys.object.timer;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -66,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirebaseUser user;
     private FirebaseAuth auth;
      public DatabaseReference mDatabaseSensor;
+    public DatabaseReference mDatabaseActuator;
+    public DatabaseReference mDatabaseSchedule;
 
     private SensorAdapter sensorAdapter;
      BroadcastReceiver broadcastReceiver;
@@ -106,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 addSensorToFireBase();
+                addActuatorToFireBase();
+                addScheduleToFireBase();
             }
         });
 
@@ -163,10 +169,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
-
+        // database Sensor
         mDatabaseSensor = FirebaseDatabase.getInstance().getReference().child("Sensors");
-
-
+        // database Actuator
+        mDatabaseActuator = FirebaseDatabase.getInstance().getReference().child("Actuators");
+        // database Schedule
+        mDatabaseSchedule = FirebaseDatabase.getInstance().getReference().child("Schedule");
 
 // ...
 
@@ -282,6 +290,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void addSensorToFireBase(){
        mDatabaseSensor.setValue(sensor.listSensor()).addOnSuccessListener(aVoid -> {
+                    // Data has been saved successfully
+                    Toast.makeText(MainActivity.this, "Save complete", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any errors
+                    Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
+                });
+    }
+    // save actuator to firebase
+    public void addActuatorToFireBase(){
+        mDatabaseActuator.setValue(actuator.listActuator()).addOnSuccessListener(aVoid -> {
+                    // Data has been saved successfully
+                    Toast.makeText(MainActivity.this, "Save complete", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any errors
+                    Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
+                });
+    }
+    // save Schedule to firebase
+    public void addScheduleToFireBase(){
+        mDatabaseSchedule.setValue(timer.globalTimer).addOnSuccessListener(aVoid -> {
                     // Data has been saved successfully
                     Toast.makeText(MainActivity.this, "Save complete", Toast.LENGTH_SHORT).show();
                 })

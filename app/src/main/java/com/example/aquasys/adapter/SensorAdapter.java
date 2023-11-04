@@ -40,14 +40,31 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.SensorView
 
     @Override
     public void onBindViewHolder(@NonNull SensorViewHolder holder, int position) {
-        sensor sen =mListSensor.get(position);
+        sensor sen = mListSensor.get(position);
         int itemPosition = holder.getAdapterPosition();
-        if(sen ==null){
+        if (sen == null) {
             return;
         }
         holder.tv_sensor.setText(sen.getName());
-        holder.tv_sensor_val.setText(sen.getValue());
+
+        String sensorValue = sen.getValue(); // Get the original sensor value
+
+        switch (sen.getName()) {
+            case "Humidity":
+            case "Moisture Soil":
+                sensorValue = sensorValue + "%";
+                break;
+            case "Temperature":
+                sensorValue = sensorValue + "°C";
+                break;
+            case "Water level":
+                sensorValue = sensorValue + "cm";
+                break;
+        }
+
+        holder.tv_sensor_val.setText(sensorValue);
         holder.img_sensor.setImageResource(sen.getImg());
+
 
     }
 
