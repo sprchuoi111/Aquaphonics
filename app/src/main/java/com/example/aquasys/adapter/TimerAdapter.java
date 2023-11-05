@@ -97,7 +97,7 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                 AlertDialog.Builder builder = new AlertDialog.Builder(holder.mMainActivity);
                 View  diaLogView = holder.mMainActivity.getLayoutInflater().inflate(R.layout.dialog_edit_timer, null);
                 builder.setView(diaLogView);
-                builder.setTitle("Edit Schedule");
+                builder.setTitle("Edit Schedule(hour:minute)");
                 builder.setIcon(R.drawable.edit);
                 // mapping for num picker in layout edit schedule
                 NumberPicker np_edit_duration_hour_from = diaLogView.findViewById(R.id.np_edit_duration_hour_from);
@@ -107,11 +107,11 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                 // set threshold for num picker
                 np_edit_duration_hour_from.setMaxValue(23);
                 np_edit_duration_hour_from.setMinValue(0);
-                np_edit_duration_minute_from.setMaxValue(63);
+                np_edit_duration_minute_from.setMaxValue(59);
                 np_edit_duration_minute_from.setMinValue(0);
                 np_edit_duration_hour_to.setMaxValue(23);
                 np_edit_duration_hour_to.setMinValue(0);
-                np_edit_duration_minute_to.setMaxValue(63);
+                np_edit_duration_minute_to.setMaxValue(59);
                 np_edit_duration_minute_to.setMinValue(0);
                 // set time initiate for num picker when
                 np_edit_duration_hour_from.setValue(timerList.get(currentPosition).getTime_start_hour());

@@ -7,20 +7,11 @@
     tools:context=".fragment.SensorFragment"
     android:orientation="vertical">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginLeft="10dp"
-        android:id="@+id/content_list_sensor"
-        app:cardCornerRadius="10dp"
-        app:cardElevation="10dp">
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/recyclerview_sensor"/>
-    </androidx.cardview.widget.CardView>
     <ToggleButton
         android:id="@+id/setMode"
         android:layout_width="wrap_content"

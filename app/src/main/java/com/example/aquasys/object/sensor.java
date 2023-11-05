@@ -12,8 +12,9 @@ public class sensor {
     int img;
     int status;
 
-    public sensor(String name, int img) {
+    public sensor(String name,String value, int img) {
         this.name = name;
+        this.value = value;
         this.img = img;
     }
 
@@ -51,12 +52,12 @@ public class sensor {
     private static List<sensor> globalSensor = new ArrayList<>();
     public static List<sensor> listSensor() {
         if (globalSensor.isEmpty()) {
-            globalSensor.add(new sensor("Humidity", R.drawable.humidity_percentage));
-            globalSensor.add(new sensor("Temperature", R.drawable.device_thermostat));
-            globalSensor.add(new sensor("Water level", R.drawable.water_level));
-            globalSensor.add(new sensor("PH", R.drawable.ph));
-            globalSensor.add(new sensor("Light Sensor", R.drawable.light_mode));
-            globalSensor.add(new sensor("Moisture Humi", R.drawable.soil));
+            globalSensor.add(new sensor("Humidity","null", R.drawable.humidity_percentage));
+            globalSensor.add(new sensor("Temperature", "null",R.drawable.device_thermostat));
+            globalSensor.add(new sensor("Water level", "null",R.drawable.water_level));
+            globalSensor.add(new sensor("PH", "null",R.drawable.ph));
+            globalSensor.add(new sensor("Light Sensor", "null",R.drawable.light_mode));
+            globalSensor.add(new sensor("Moisture Humi", "null",R.drawable.soil));
         }
         return globalSensor;
     }

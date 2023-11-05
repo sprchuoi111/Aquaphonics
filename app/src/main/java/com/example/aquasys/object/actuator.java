@@ -5,6 +5,7 @@ import com.example.aquasys.R;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class actuator {
     String name;
     int status;
@@ -13,7 +14,9 @@ public class actuator {
     int minute;
 
 
-
+    //no-argument constructor
+    public actuator(){};
+    // contructtor
     public actuator(String name, int img   , int status) {
         this.name = name;
         this.img = img;
@@ -59,7 +62,7 @@ public class actuator {
         this.minute = minute;
     }
 
-    private static List<actuator> globalActuator = new ArrayList<>();
+    public static List<actuator> globalActuator = new ArrayList<>();
     public static List<actuator> listActuator(){
         if(globalActuator.isEmpty()){
             globalActuator.add(0, new actuator("BULB 1" , R.drawable.lightbulb , 0 ));

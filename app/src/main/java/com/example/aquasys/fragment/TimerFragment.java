@@ -38,6 +38,7 @@ import java.util.List;
 
 public class TimerFragment extends Fragment {
 
+    String time;
     private FloatingActionButton btn_timer;
     private View mView;
     private actuator temp_act;
@@ -48,7 +49,6 @@ public class TimerFragment extends Fragment {
     private FloatingActionButton btn_done;
     private RecyclerView recyclerview_timer;
     private TimerAdapter timerAdapter;
-    String time;
 
     public TimerFragment() {
     }
@@ -67,9 +67,11 @@ public class TimerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_timer, container, false);
-
+        //GetContext for main Activity
+        mMainActivity = (MainActivity) getContext();
         btn_timer = mView.findViewById(R.id.btn_timer);
         btn_timer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,6 +87,8 @@ public class TimerFragment extends Fragment {
         // setting show sensor list in the recyclerview
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
         recyclerview_timer.setLayoutManager(linearLayoutManager);
+
+        // set list for sensor adapter
         timerAdapter = new TimerAdapter(timer.globalTimer, new SelectListenerTimer() {
             @Override
             public void onClickItemTimer(timer tim, int position) {
@@ -92,14 +96,16 @@ public class TimerFragment extends Fragment {
             }
         });
         recyclerview_timer.setAdapter(timerAdapter);
-
+        //read data from schedule firebase
+        if(timer.globalTimer.isEmpty())
+            ReadScheduleData();
         return mView;
     }
 
     private void showBottomDiaLog(){
         final Dialog dialog = new Dialog(getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mMainActivity = (MainActivity) getContext();
+
         View mViewDialog = mMainActivity.getLayoutInflater().inflate(R.layout.dialog_set_timer,null);
         dialog.setContentView(mViewDialog);
         dialog.show();
@@ -109,11 +115,11 @@ public class TimerFragment extends Fragment {
         dialog.getWindow().setGravity(Gravity.BOTTOM);
 
         temp_act = null;
-        //pocessing imf in bottom sheet
+        //processing imf in bottom sheet
         // Set a click listener for each button
         /// get View from dialog
 
-
+        // mapping for button and num pick for select schedule timer
         btn_bulb1 = mViewDialog.findViewById(R.id.btn_bulb1);
         btn_bulb2 = mViewDialog.findViewById(R.id.btn_bulb2);
         btn_pump = mViewDialog.findViewById(R.id.btn_pump);
@@ -132,8 +138,10 @@ public class TimerFragment extends Fragment {
         np_duration_hour_to.setMinValue(0);
         np_duration_minute_to.setMaxValue(59);
         np_duration_minute_to.setMinValue(0);
-        // set conditon for np value of minute and hour
+        // set condition for np value of minute and hour
         np_duration_hour_to.setValue(np_duration_hour_from.getValue());
+
+        //Button select when choosing device for schedule timer
         btn_bulb1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -187,17 +195,7 @@ public class TimerFragment extends Fragment {
         btn_done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Inflate the layout for this fragment.
-                recyclerview_timer = mView.findViewById(R.id.recyclerview_timer); // Find the RecyclerView in the layout.
-                // setting show sensor list in the recyclerview
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
-                recyclerview_timer.setLayoutManager(linearLayoutManager);
-                timerAdapter = new TimerAdapter(timer.globalTimer, new SelectListenerTimer() {
-                    @Override
-                    public void onClickItemTimer(timer tim, int position) {
-
-                    }
-                });
+                timerAdapter.notifyDataSetChanged();
                 if (temp_act != null) {
                     int hourFrom = np_duration_hour_from.getValue();
                     int minuteFrom = np_duration_minute_from.getValue();
@@ -206,7 +204,7 @@ public class TimerFragment extends Fragment {
 
                     if ((hourFrom < hourTo) || (hourFrom == hourTo && minuteFrom < minuteTo)) {
                         // Add the timer
-                        timer.globalTimer.add(0, new timer(temp_act, hourFrom, minuteFrom, hourTo, minuteTo));
+                        timer.globalTimer.add(new timer(temp_act, hourFrom, minuteFrom, hourTo, minuteTo));
                         recyclerview_timer.setAdapter(timerAdapter);
                         dialog.cancel();
                         mMainActivity.addScheduleToFireBase();
@@ -224,26 +222,28 @@ public class TimerFragment extends Fragment {
         });
 
     }
-
-    private void ReadScheduleData(final String TimerName, final int TimerIndex) {
-        mMainActivity.mDatabaseActuator.child(String.valueOf(TimerIndex)).child("status").addValueEventListener(new ValueEventListener() {
+    // Read Scheduler data from firebase
+    private void ReadScheduleData() {
+        mMainActivity.mDatabaseSchedule.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int status = snapshot.getValue(int.class);
-                timer.globalTimer.get(TimerIndex).setStatus(status);
-                // set list for sensor adapter
-                actuatorAdapter = new ActuatorAdapter(actuator.listActuator(), new SelectListenerActuator() {
-                    @Override
-                    public void onClickItemActuator(actuator act, int position) {
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    timer schedule  = dataSnapshot.getValue(timer.class);
+                    timer.globalTimer.add(schedule);
+                    Toast.makeText(mMainActivity, "Reading success" , Toast.LENGTH_SHORT).show();
                     }
-                });
-                recyclerViewActuator.setAdapter(actuatorAdapter);
-
+                timerAdapter.notifyDataSetChanged();
             }
-
+                // set list for sensor adapter
+//                timerAdapter = new TimerAdapter(timer.globalTimer, new SelectListenerTimer() {
+//                    @Override
+//                    public void onClickItemTimer(timer tim, int position) {
+//
+//                    }
+//                });
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Toast.makeText(mMainActivity, "Error occurred while reading" , Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -9,6 +9,10 @@ public class timer {
     int time_start_minute;
     int time_stop_hour;
     int time_stop_minute;
+    // Default (no-argument) constructor
+    public timer() {
+        // You can initialize your fields with default values here if needed
+    }
 
     public timer(actuator act, int time_start_hour, int time_start_minute, int time_stop_hour, int time_stop_minute) {
         this.act = act;

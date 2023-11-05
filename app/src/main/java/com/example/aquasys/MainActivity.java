@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // database Actuator
         mDatabaseActuator = FirebaseDatabase.getInstance().getReference().child("Actuators");
         // database Schedule
-        mDatabaseSchedule = FirebaseDatabase.getInstance().getReference().child("Schedule");
+        mDatabaseSchedule = FirebaseDatabase.getInstance().getReference().child("Schedules");
 
 // ...
 
@@ -339,6 +339,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
     }
+
+
+
+
 
     @Override
     protected void onDestroy() {

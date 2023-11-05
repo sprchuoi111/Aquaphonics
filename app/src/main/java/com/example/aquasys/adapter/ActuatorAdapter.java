@@ -23,9 +23,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
+import com.example.aquasys.fragment.ActuatorFragment;
 import com.example.aquasys.object.actuator;
 import com.example.aquasys.listener.SelectListenerActuator;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.ActuatorViewHolder>{
@@ -56,6 +61,8 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
         }
         holder.img_actuator.setImageResource(act.getImg());
         holder.tv_name_actuator.setText(act.getName());
+
+
         holder.btn_actuator.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -70,7 +77,7 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
                     else {
                         holder.card_actuator.setCardBackgroundColor(purpleColor);
                         act.setStatus(1);
-                        Toast.makeText(holder.mMainActivity, "Duration: " + String.format("%02d:%02d", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(holder.mMainActivity, act.getName() + String.format(",Duration : %02d:%02d ", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
                         //save actuator to firebase
                         holder.mMainActivity.addActuatorToFireBase();
                     }
@@ -122,7 +129,48 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
                 dialog.show();
             }
         });
+        // update realtime actuator in firebase
+        holder.mMainActivity.mDatabaseActuator.child(String.valueOf(itemPosition)).child("status").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int status = snapshot.getValue(int.class);
+                actuator.listActuator().get(itemPosition).setStatus(status);
+                // set list for sensor adapter
+                // Check realtime state
+                //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
+                // change state of button
+                int purpleColor = ContextCompat.getColor(holder.mMainActivity, R.color.purple);
+                int whiteColor = ContextCompat.getColor(holder.mMainActivity, R.color.white);
+                if(status == 1 ) {
+                    if(actuator.listActuator().get(itemPosition).getHour() == 0 && actuator.listActuator().get(itemPosition).getMinute() == 0 ){
+                        holder.btn_actuator.setChecked(false);
+                        act.setStatus(0);
+                        //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
+                        // save status back to actuator
+                        holder.mMainActivity.addActuatorToFireBase();
+                    }
+                    else {
+                        holder.card_actuator.setCardBackgroundColor(purpleColor);
+                        holder.btn_actuator.setChecked(true);
+                        act.setStatus(1);
+                    }
+                }
+                if(status == 0){
+                    holder.btn_actuator.setChecked(false);
+                    act.setStatus(0);
+                    holder.card_actuator.setCardBackgroundColor(whiteColor);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when read data" , Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
     }
+
+
 
     @Override
     public int getItemCount() {
@@ -137,9 +185,6 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
         private MainActivity mMainActivity;
 
         private Button btn_set_duration;
-
-
-
 
         public ActuatorViewHolder(@NonNull View itemView) {
             super(itemView);

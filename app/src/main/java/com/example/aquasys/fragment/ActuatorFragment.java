@@ -3,6 +3,7 @@ package com.example.aquasys.fragment;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +24,9 @@ import com.example.aquasys.object.sensor;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActuatorFragment extends Fragment {
     private RecyclerView recyclerViewActuator; // RecyclerView for actuator
@@ -55,38 +59,47 @@ public class ActuatorFragment extends Fragment {
         // setting show the managerList manager recyclerView for actuator
         GridLayoutManager gridLayoutManager = new GridLayoutManager(mMainActivity , 2);
         recyclerViewActuator.setLayoutManager(gridLayoutManager);
-        ReadActuatorData("Bulb1" ,0);
-        ReadActuatorData("Bulb2" ,1);
-        ReadActuatorData("Pump" ,2);
-        ReadActuatorData("Heater" ,3);
+        // read from firebase when the first time open app
+        ReadDatafromFireBase();
 
         return mView;
     }
 
-    // read data form firebase
-    // Read data from Firebase for a specific sensor and update the corresponding sensor object
-    //change button state update realtime
-    private void ReadActuatorData(final String ActuatorName, final int actuatorIndex) {
-        mMainActivity.mDatabaseActuator.child(String.valueOf(actuatorIndex)).child("status").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int status = snapshot.getValue(int.class);
-                actuator.listActuator().get(actuatorIndex).setStatus(status);
-                // set list for sensor adapter
-                actuatorAdapter = new ActuatorAdapter(actuator.listActuator(), new SelectListenerActuator() {
-                    @Override
-                    public void onClickItemActuator(actuator act, int position) {
-                    }
-                });
-                recyclerViewActuator.setAdapter(actuatorAdapter);
+    // read from firebase when the first time open app
+    private void ReadDatafromFireBase(){
+        mMainActivity.mDatabaseActuator.addListenerForSingleValueEvent(new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            List<actuator> actuatorList = new ArrayList<>();
+            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                actuator act = dataSnapshot.getValue(actuator.class);
+                if (act != null) {
+                    actuatorList.add(act);
 
+                }
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            // test for reading
+            //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
 
-            }
+            actuator.globalActuator = actuatorList;
+
+            // set list for sensor adapter
+            actuatorAdapter = new ActuatorAdapter(actuator.listActuator(), new SelectListenerActuator() {
+                @Override
+                public void onClickItemActuator(actuator act, int position) {
+                }
+            });
+            recyclerViewActuator.setAdapter(actuatorAdapter);
+            mMainActivity.addActuatorToFireBase();
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+        }
         });
-
     }
+
+
 }

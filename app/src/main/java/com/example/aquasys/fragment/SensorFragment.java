@@ -3,6 +3,7 @@ package com.example.aquasys.fragment;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -59,6 +60,14 @@ public class SensorFragment extends Fragment {
         // setting show sensor list in the recyclerview
         GridLayoutManager gridLayoutManager = new GridLayoutManager(mMainActivity, 2);
         recyclerview_sensor.setLayoutManager(gridLayoutManager);
+        sensorAdapter =new SensorAdapter(sensor.listSensor(), new SelectListener() {
+            @Override
+            public void onClickItemSensor(sensor sen, int position) {
+                mMainActivity.goToSensorDevice(sen.getName().toString() , position);
+            }
+        });
+        //Set Sensor adapter
+        recyclerview_sensor.setAdapter(sensorAdapter);
         ReadSensorData("Humidity", 0);
         ReadSensorData("Temperature", 1);
         ReadSensorData("Water level", 2);
@@ -90,7 +99,8 @@ public class SensorFragment extends Fragment {
                     });
                     //Set Sensor adapter
                     recyclerview_sensor.setAdapter(sensorAdapter);
-                    Toast.makeText(mMainActivity, sensorName + " Data Received : " +sensor.listSensor().get(sensorIndex).getValue(), Toast.LENGTH_SHORT).show();
+                    // checking data
+                    //Toast.makeText(mMainActivity, sensorName + " Data Received : " +sensor.listSensor().get(sensorIndex).getValue(), Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(mMainActivity, sensorName + " Data is null", Toast.LENGTH_SHORT).show();
                 }
