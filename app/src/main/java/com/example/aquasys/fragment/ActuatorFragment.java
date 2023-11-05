@@ -32,7 +32,7 @@ public class ActuatorFragment extends Fragment {
     private RecyclerView recyclerViewActuator; // RecyclerView for actuator
     private ActuatorAdapter actuatorAdapter ; // adapter for the actuator
     private MainActivity mMainActivity ;
-    private View mView;
+
     public ActuatorFragment() {
         // Required empty public constructor
     }
@@ -53,7 +53,7 @@ public class ActuatorFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // inflate layout for this fragment
-        mView = inflater.inflate(R.layout.fragment_actuator, container, false);
+        View mView = inflater.inflate(R.layout.fragment_actuator, container, false);
         mMainActivity = (MainActivity) getContext();
         recyclerViewActuator = mView.findViewById(R.id.recyclerview_adapter);
         // setting show the managerList manager recyclerView for actuator
@@ -85,10 +85,7 @@ public class ActuatorFragment extends Fragment {
             actuator.globalActuator = actuatorList;
 
             // set list for sensor adapter
-            actuatorAdapter = new ActuatorAdapter(actuator.listActuator(), new SelectListenerActuator() {
-                @Override
-                public void onClickItemActuator(actuator act, int position) {
-                }
+            actuatorAdapter = new ActuatorAdapter(actuator.listActuator(), (act, position) -> {
             });
             recyclerViewActuator.setAdapter(actuatorAdapter);
             mMainActivity.addActuatorToFireBase();

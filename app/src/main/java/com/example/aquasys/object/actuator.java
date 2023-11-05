@@ -15,8 +15,8 @@ public class actuator {
 
 
     //no-argument constructor
-    public actuator(){};
-    // contructtor
+    public actuator(){}
+    // constructor
     public actuator(String name, int img   , int status) {
         this.name = name;
         this.img = img;

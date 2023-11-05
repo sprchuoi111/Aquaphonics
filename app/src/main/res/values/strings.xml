@@ -26,6 +26,9 @@
     <string name="forgot_pass">Forgot password</string>
     <string name="email">Email</string>
     <string name="reset_pass">Reset Password</string>
+    <string name="no_network">No Network</string>
+    <string name="no_internet_connection">Please make sure you are connected to an active network and try again</string>
+    <string name="retry">Retry</string>
 
 
 </resources>

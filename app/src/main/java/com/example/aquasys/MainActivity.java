@@ -1,14 +1,11 @@
 package com.example.aquasys;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.BroadcastReceiver;
@@ -17,12 +14,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -31,25 +24,18 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.aquasys.adapter.SensorAdapter;
-import com.example.aquasys.adapter.TimerAdapter;
+import com.example.aquasys.network.NetworkChangeReceiver;
 import com.example.aquasys.login.Login;
 import com.example.aquasys.object.actuator;
 import com.example.aquasys.object.sensor;
 import com.example.aquasys.object.timer;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -63,15 +49,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ViewPager2 mViewPager; // Declare a ViewPager2 variable.
 
     private DrawerLayout drawer_layout; // Declare a DrawerLayout variable.
-    private Toolbar toolbar; // Declare a Toolbar variable.
-    //Firebase
-    private FirebaseUser user;
-    private FirebaseAuth auth;
-     public DatabaseReference mDatabaseSensor;
+    public DatabaseReference mDatabaseSensor;
     public DatabaseReference mDatabaseActuator;
     public DatabaseReference mDatabaseSchedule;
 
-    private SensorAdapter sensorAdapter;
      BroadcastReceiver broadcastReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +72,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Set up the ViewPager for handling swipeable screens.
         setUpViewPager();
         // Set up the Toolbar and connect it to the ActionBar.
-        toolbar = findViewById(R.id.toolbar);
+        // Declare a Toolbar variable.
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Right side button toolbar
         Button btn_update = new Button(this);
@@ -106,13 +88,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         toolbar.addView(btn_update);
 
-        btn_update.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addSensorToFireBase();
-                addActuatorToFireBase();
-                addScheduleToFireBase();
-            }
+        btn_update.setOnClickListener(v -> {
+            addSensorToFireBase();
+            addActuatorToFireBase();
+            addScheduleToFireBase();
         });
 
         // Create an ActionBarDrawerToggle for syncing the ActionBar with the DrawerLayout.
@@ -127,20 +106,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigation_view.setNavigationItemSelectedListener(this);
 
         // Set up click events for the items in the BottomNavigationView.
-        bottom_navi.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                // Handle item clicks in the BottomNavigationView.
-                int id = item.getItemId();
-                if (id == R.id.active_sensor) {
-                    openSensorFragment();
-                } else if (id == R.id.active_actuator) {
-                    openActuatorFragment();
-                } else if (id == R.id.active_timer) {
-                    openTimerFragment();
-                }
-                return true;
+        bottom_navi.setOnItemSelectedListener(item -> {
+            // Handle item clicks in the BottomNavigationView.
+            int id = item.getItemId();
+            if (id == R.id.active_sensor) {
+                openSensorFragment();
+            } else if (id == R.id.active_actuator) {
+                openActuatorFragment();
+            } else if (id == R.id.active_timer) {
+                openTimerFragment();
             }
+            return true;
         });
 
 
@@ -184,9 +160,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void getUserInformation(){
 
         // Method to check user authentication and redirect to the login page if necessary
-        auth= FirebaseAuth.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         // get user
-        user = auth.getCurrentUser();
+        //Firebase
+        FirebaseUser user = auth.getCurrentUser();
 
         if(user ==null){
             // User is not logged in, so redirect to the login page
@@ -323,13 +300,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // MetWork processing when occur error connection
     // register Network
     protected void registerNetworkBroadcastReceiver(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
-            registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        }
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        }
-
+        registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
     protected void unregisterNetwork(){
         try {

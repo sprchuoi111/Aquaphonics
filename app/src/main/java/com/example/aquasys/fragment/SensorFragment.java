@@ -33,9 +33,6 @@ public class SensorFragment extends Fragment {
     private MainActivity mMainActivity; // A reference to the main activity.
     private SensorAdapter sensorAdapter ; // adapter for the sensor fragment
 
-    private View mView; // A reference to the main view of the fragment.
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,18 +51,14 @@ public class SensorFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment.
-        mView = inflater.inflate(R.layout.fragment_sensor, container, false); // Inflate the fragment_home layout into mView.
+        // A reference to the main view of the fragment.
+        View mView = inflater.inflate(R.layout.fragment_sensor, container, false); // Inflate the fragment_home layout into mView.
         mMainActivity = (MainActivity) getActivity(); // Get a reference to the hosting Activity (assumed to be MainActivity).
         recyclerview_sensor = mView.findViewById(R.id.recyclerview_sensor); // Find the RecyclerView in the layout.
         // setting show sensor list in the recyclerview
         GridLayoutManager gridLayoutManager = new GridLayoutManager(mMainActivity, 2);
         recyclerview_sensor.setLayoutManager(gridLayoutManager);
-        sensorAdapter =new SensorAdapter(sensor.listSensor(), new SelectListener() {
-            @Override
-            public void onClickItemSensor(sensor sen, int position) {
-                mMainActivity.goToSensorDevice(sen.getName().toString() , position);
-            }
-        });
+        sensorAdapter =new SensorAdapter(sensor.listSensor(), (sen, position) -> mMainActivity.goToSensorDevice(sen.getName(), position));
         //Set Sensor adapter
         recyclerview_sensor.setAdapter(sensorAdapter);
         ReadSensorData("Humidity", 0);
@@ -91,12 +84,7 @@ public class SensorFragment extends Fragment {
                 if (value != null) {
                     sensor.listSensor().get(sensorIndex).setValue(value);
                     // set list for sensor adapter
-                    sensorAdapter =new SensorAdapter(sensor.listSensor(), new SelectListener() {
-                        @Override
-                        public void onClickItemSensor(sensor sen, int position) {
-                            mMainActivity.goToSensorDevice(sen.getName().toString() , position);
-                        }
-                    });
+                    sensorAdapter =new SensorAdapter(sensor.listSensor(), (sen, position) -> mMainActivity.goToSensorDevice(sen.getName(), position));
                     //Set Sensor adapter
                     recyclerview_sensor.setAdapter(sensorAdapter);
                     // checking data

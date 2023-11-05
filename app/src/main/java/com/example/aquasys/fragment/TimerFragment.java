@@ -1,5 +1,6 @@
 package com.example.aquasys.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -35,18 +36,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
+import java.util.Objects;
 
 public class TimerFragment extends Fragment {
 
-    String time;
-    private FloatingActionButton btn_timer;
-    private View mView;
     private actuator temp_act;
     private ToggleButton btn_bulb1,btn_bulb2,btn_pump,btn_heater;
     private NumberPicker np_duration_hour_from , np_duration_minute_from ;
     private NumberPicker np_duration_hour_to , np_duration_minute_to ;
     private MainActivity mMainActivity;
-    private FloatingActionButton btn_done;
     private RecyclerView recyclerview_timer;
     private TimerAdapter timerAdapter;
 
@@ -58,6 +56,7 @@ public class TimerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onResume() {
         super.onResume();
@@ -69,16 +68,11 @@ public class TimerFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        mView = inflater.inflate(R.layout.fragment_timer, container, false);
+        View mView = inflater.inflate(R.layout.fragment_timer, container, false);
         //GetContext for main Activity
         mMainActivity = (MainActivity) getContext();
-        btn_timer = mView.findViewById(R.id.btn_timer);
-        btn_timer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showBottomDiaLog();
-            }
-        });
+        FloatingActionButton btn_timer = mView.findViewById(R.id.btn_timer);
+        btn_timer.setOnClickListener(v -> showBottomDiaLog());
 
         // Define a boolean variable to keep track of the currently selected button
 
@@ -89,11 +83,8 @@ public class TimerFragment extends Fragment {
         recyclerview_timer.setLayoutManager(linearLayoutManager);
 
         // set list for sensor adapter
-        timerAdapter = new TimerAdapter(timer.globalTimer, new SelectListenerTimer() {
-            @Override
-            public void onClickItemTimer(timer tim, int position) {
+        timerAdapter = new TimerAdapter(timer.globalTimer, (tim, position) -> {
 
-            }
         });
         recyclerview_timer.setAdapter(timerAdapter);
         //read data from schedule firebase
@@ -102,14 +93,15 @@ public class TimerFragment extends Fragment {
         return mView;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void showBottomDiaLog(){
-        final Dialog dialog = new Dialog(getContext());
+        final Dialog dialog = new Dialog(requireContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        View mViewDialog = mMainActivity.getLayoutInflater().inflate(R.layout.dialog_set_timer,null);
+        @SuppressLint("InflateParams") View mViewDialog = mMainActivity.getLayoutInflater().inflate(R.layout.dialog_set_timer,null);
         dialog.setContentView(mViewDialog);
         dialog.show();
-        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        Objects.requireNonNull(dialog.getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
         dialog.getWindow().setGravity(Gravity.BOTTOM);
@@ -124,7 +116,7 @@ public class TimerFragment extends Fragment {
         btn_bulb2 = mViewDialog.findViewById(R.id.btn_bulb2);
         btn_pump = mViewDialog.findViewById(R.id.btn_pump);
         btn_heater = mViewDialog.findViewById(R.id.btn_heater);
-        btn_done = mViewDialog.findViewById(R.id.btn_done);
+        FloatingActionButton btn_done = mViewDialog.findViewById(R.id.btn_done);
         np_duration_hour_from = mViewDialog.findViewById(R.id.np_duration_hour_from);
         np_duration_minute_from = mViewDialog.findViewById(R.id.np_duration_minute_from);
         np_duration_hour_to = mViewDialog.findViewById(R.id.np_duration_hour_to);
@@ -142,89 +134,75 @@ public class TimerFragment extends Fragment {
         np_duration_hour_to.setValue(np_duration_hour_from.getValue());
 
         //Button select when choosing device for schedule timer
-        btn_bulb1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    btn_bulb2.setChecked(false);
-                    btn_pump.setChecked(false);
-                    btn_heater.setChecked(false);
-                    temp_act = actuator.listActuator().get(0);
-                }
-                else temp_act = null;
+        btn_bulb1.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked){
+                btn_bulb2.setChecked(false);
+                btn_pump.setChecked(false);
+                btn_heater.setChecked(false);
+                temp_act = actuator.listActuator().get(0);
             }
+            else temp_act = null;
         });
-        btn_bulb2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    btn_bulb1.setChecked(false);
-                    btn_pump.setChecked(false);
-                    btn_heater.setChecked(false);
-                    temp_act = actuator.listActuator().get(1);
-                }
-                else temp_act = null;
+        btn_bulb2.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked){
+                btn_bulb1.setChecked(false);
+                btn_pump.setChecked(false);
+                btn_heater.setChecked(false);
+                temp_act = actuator.listActuator().get(1);
             }
+            else temp_act = null;
         });
-        btn_pump.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    btn_bulb1.setChecked(false);
-                    btn_bulb2.setChecked(false);
-                    btn_heater.setChecked(false);
-                    temp_act = actuator.listActuator().get(2);
-                }
-                else temp_act = null;
+        btn_pump.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked){
+                btn_bulb1.setChecked(false);
+                btn_bulb2.setChecked(false);
+                btn_heater.setChecked(false);
+                temp_act = actuator.listActuator().get(2);
             }
+            else temp_act = null;
         });
 
-        btn_heater.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    btn_bulb1.setChecked(false);
-                    btn_bulb2.setChecked(false);
-                    btn_pump.setChecked(false);
-                    temp_act = actuator.listActuator().get(3);
-                }
-                else temp_act = null;
+        btn_heater.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked){
+                btn_bulb1.setChecked(false);
+                btn_bulb2.setChecked(false);
+                btn_pump.setChecked(false);
+                temp_act = actuator.listActuator().get(3);
             }
+            else temp_act = null;
         });
 
-        btn_done.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                timerAdapter.notifyDataSetChanged();
-                if (temp_act != null) {
-                    int hourFrom = np_duration_hour_from.getValue();
-                    int minuteFrom = np_duration_minute_from.getValue();
-                    int hourTo = np_duration_hour_to.getValue();
-                    int minuteTo = np_duration_minute_to.getValue();
+        btn_done.setOnClickListener(v -> {
+            timerAdapter.notifyDataSetChanged();
+            if (temp_act != null) {
+                int hourFrom = np_duration_hour_from.getValue();
+                int minuteFrom = np_duration_minute_from.getValue();
+                int hourTo = np_duration_hour_to.getValue();
+                int minuteTo = np_duration_minute_to.getValue();
 
-                    if ((hourFrom < hourTo) || (hourFrom == hourTo && minuteFrom < minuteTo)) {
-                        // Add the timer
-                        timer.globalTimer.add(new timer(temp_act, hourFrom, minuteFrom, hourTo, minuteTo));
-                        recyclerview_timer.setAdapter(timerAdapter);
-                        dialog.cancel();
-                        mMainActivity.addScheduleToFireBase();
-                    } else {
-                        // Display a toast when the conditions are not met
-                        Toast.makeText(getContext(), "Please choose again!!", Toast.LENGTH_SHORT).show();
-                    }
+                if ((hourFrom < hourTo) || (hourFrom == hourTo && minuteFrom < minuteTo)) {
+                    // Add the timer
+                    timer.globalTimer.add(new timer(temp_act, hourFrom, minuteFrom, hourTo, minuteTo));
+                    recyclerview_timer.setAdapter(timerAdapter);
+                    dialog.cancel();
+                    mMainActivity.addScheduleToFireBase();
                 } else {
-                    // Display a toast when temp_act is null
-                    Toast.makeText(getContext(), "Actuator is null. Please choose again!!", Toast.LENGTH_SHORT).show();
+                    // Display a toast when the conditions are not met
+                    Toast.makeText(getContext(), "Please choose again!!", Toast.LENGTH_SHORT).show();
                 }
-
-
+            } else {
+                // Display a toast when temp_act is null
+                Toast.makeText(getContext(), "Actuator is null. Please choose again!!", Toast.LENGTH_SHORT).show();
             }
+
+
         });
 
     }
     // Read Scheduler data from firebase
     private void ReadScheduleData() {
         mMainActivity.mDatabaseSchedule.addListenerForSingleValueEvent(new ValueEventListener() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren()){

@@ -1,16 +1,14 @@
-package com.example.aquasys;
+package com.example.aquasys.loading;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.Toast;
+
+import com.example.aquasys.MainActivity;
+import com.example.aquasys.R;
+import com.example.aquasys.network.NetworkChangeReceiver;
 
 public class LoadingPage extends AppCompatActivity  {
     // create hander for loadding page
@@ -26,7 +24,6 @@ public class LoadingPage extends AppCompatActivity  {
 
         // create loading page
         handler = new Handler();
-        while(!InternetIsConnected()) ;
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -38,18 +35,6 @@ public class LoadingPage extends AppCompatActivity  {
         }, 3000);
     }
 
-
-
-    //Check connect internet
-    // check internet ping to gg
-    public boolean InternetIsConnected() {
-        try {
-            String command = "ping -c 1 google.com";
-            return (Runtime.getRuntime().exec(command).waitFor() == 0);
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
 
 
