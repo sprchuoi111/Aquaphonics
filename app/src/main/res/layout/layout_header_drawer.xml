@@ -5,23 +5,24 @@
     android:background="@color/blue"
     android:orientation="vertical"
     android:padding="15dp">
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/ic_launcher"
+        android:layout_marginBottom="10dp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Room Managerment"
+        android:text="@string/aquaphonics"
         android:textColor="@color/white"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:textStyle="bold"
         />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="quangbinhlxcity@gmail.com"
-        android:textSize="15dp"
+        android:text="@string/binhnguyen_mail"
+        android:textSize="15sp"
         />
 
 </LinearLayout>

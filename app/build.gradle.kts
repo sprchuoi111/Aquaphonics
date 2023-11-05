@@ -40,10 +40,12 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     // glide libs
-    implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
     // Glide v4 uses this new annotation processor -- see https://bumptech.github.io/glide/doc/generatedapi.html
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
     //implementation gif loadding
     implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.28")
+    // circle img
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
 
 }

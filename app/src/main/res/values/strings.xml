@@ -29,6 +29,8 @@
     <string name="no_network">No Network</string>
     <string name="no_internet_connection">Please make sure you are connected to an active network and try again</string>
     <string name="retry">Retry</string>
+    <string name="aquaphonics">AquaPhonics</string>
+    <string name="binhnguyen_mail">quangbinhlxcity@gmail.com</string>
 
 
 </resources>
