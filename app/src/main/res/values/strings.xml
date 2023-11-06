@@ -31,6 +31,11 @@
     <string name="retry">Retry</string>
     <string name="aquaphonics">AquaPhonics</string>
     <string name="binhnguyen_mail">quangbinhlxcity@gmail.com</string>
+    <string name="humidity">Humidity</string>
+    <string name="todo">TODO</string>
+    <string name="temperature">Temperature</string>
+    <string name="water_levels">Water Levels</string>
+    <string name="light_sensor">Light Sensor</string>
 
 
 </resources>

@@ -4,14 +4,25 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -21,9 +32,12 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.example.aquasys.adapter.ActuatorAdapter;
 import com.example.aquasys.adapter.SensorAdapter;
+import com.example.aquasys.loading.LoadingPage;
 import com.example.aquasys.network.NetworkChangeReceiver;
 import com.example.aquasys.login.Login;
 import com.example.aquasys.object.actuator;
@@ -37,12 +51,16 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     //create variable for fragment
-    private static final int FRAGMENT_SENSOR= 0;
+
+
+
+    private static final int FRAGMENT_SENSOR = 0;
     private static final int FRAGMENT_ACTUATOR = 1;
-    private static final int FRAGMENT_TIMER  = 2;
+    private static final int FRAGMENT_TIMER = 2;
+    private static final String CHANNEL_ID = "notify";
     // create for current fragment
     private int mCurrentFragment = FRAGMENT_SENSOR;
     private BottomNavigationView bottom_navi; // Declare a BottomNavigationView variable.
@@ -53,13 +71,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public DatabaseReference mDatabaseActuator;
     public DatabaseReference mDatabaseSchedule;
 
-     BroadcastReceiver broadcastReceiver;
+    BroadcastReceiver broadcastReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // test notification
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel notificationChannel= null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationChannel = new NotificationChannel(CHANNEL_ID,"name", NotificationManager.IMPORTANCE_LOW);
+        }
 
+
+        // Get the layouts to use in the custom notification
+        RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.small_notification_layout);
+        RemoteViews notificationLayoutExpanded = new RemoteViews(getPackageName(), R.layout.notification_layout);
+
+        // Apply the layouts to the notification.
+        Notification customNotification = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.aquaphonic)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(notificationLayout)
+                .setCustomBigContentView(notificationLayoutExpanded)
+                .build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+        notificationManager.notify(666, customNotification);
         // Check Internet Connection
         // create broadcast receiver
         broadcastReceiver = new NetworkChangeReceiver();
@@ -92,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             addSensorToFireBase();
             addActuatorToFireBase();
             addScheduleToFireBase();
+
         });
 
         // Create an ActionBarDrawerToggle for syncing the ActionBar with the DrawerLayout.
@@ -152,12 +194,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // database Schedule
         mDatabaseSchedule = FirebaseDatabase.getInstance().getReference().child("Schedules");
 
-// ...
 
-// Assuming you have a reference to the Firebase Realtime Database
+
+        // Assuming you have a reference to the Firebase Realtime Database
     }
+
     // Manage user information
-    private void getUserInformation(){
+    private void getUserInformation() {
 
         // Method to check user authentication and redirect to the login page if necessary
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -165,13 +208,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Firebase
         FirebaseUser user = auth.getCurrentUser();
 
-        if(user ==null){
+        if (user == null) {
             // User is not logged in, so redirect to the login page
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
             finish();
         }
     }
+
     // Set up the ViewPager with an adapter.
     private void setUpViewPager() {
         viewPagerAdapter mViewPagerAdapter = new viewPagerAdapter(this);
@@ -204,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer_layout.closeDrawer(GravityCompat.START); // Close the navigation drawer.
         return true;
     }
+
     public void goToSensorDevice(String nameSensor, int index) { //tạo phương thức chuyển hướng Fragment từ Room sang Device
 
         //tạo Intent để chuyển từ MainActivity sang Device Activity đồng thời bundle dữ liệu sang
@@ -215,6 +260,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //chuyển dữ liệu gồm tên phòng (key:NameRoom) và vị trí của phòng (key:index)
         startActivity(i);
     }
+
     //Create method open Fragment
     //Fragment Sensor
     private void openSensorFragment() {
@@ -224,13 +270,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //nếu màn hình hiện tại không ở HomeFragment thì nó sẽ chuyển sang HomeFragment đồng thời lưu giá trị tương ứng vào mCurrentFragment để kiểm tra cho các lần chọn sau
         }
     }
+
     //Fragment Actuator
-        private void openActuatorFragment() {
+    private void openActuatorFragment() {
         if (mCurrentFragment != FRAGMENT_ACTUATOR) {
             mViewPager.setCurrentItem(1);
             mCurrentFragment = FRAGMENT_ACTUATOR;
         }
     }
+
     //Fragment Timer
     private void openTimerFragment() {
         if (mCurrentFragment != FRAGMENT_TIMER) {
@@ -248,11 +296,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             super.onBackPressed();
         }
     }
+
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null;
     }
+
     // check internet ping to gg
     public boolean InternetIsConnected() {
         try {
@@ -265,8 +315,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // save sensor to firebase
 
-    public void addSensorToFireBase(){
-       mDatabaseSensor.setValue(sensor.listSensor()).addOnSuccessListener(aVoid -> {
+    public void addSensorToFireBase() {
+        mDatabaseSensor.setValue(sensor.listSensor()).addOnSuccessListener(aVoid -> {
                     // Data has been saved successfully
                     Toast.makeText(MainActivity.this, "Save complete", Toast.LENGTH_SHORT).show();
                 })
@@ -275,8 +325,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
                 });
     }
+
     // save actuator to firebase
-    public void addActuatorToFireBase(){
+    public void addActuatorToFireBase() {
         mDatabaseActuator.setValue(actuator.listActuator()).addOnSuccessListener(aVoid -> {
                     // Data has been saved successfully
                 })
@@ -285,8 +336,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
                 });
     }
+
     // save Schedule to firebase
-    public void addScheduleToFireBase(){
+    public void addScheduleToFireBase() {
         mDatabaseSchedule.setValue(timer.globalTimer).addOnSuccessListener(aVoid -> {
                     // Data has been saved successfully
                     Toast.makeText(MainActivity.this, "Save complete", Toast.LENGTH_SHORT).show();
@@ -299,20 +351,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // MetWork processing when occur error connection
     // register Network
-    protected void registerNetworkBroadcastReceiver(){
+    protected void registerNetworkBroadcastReceiver() {
         registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
-    protected void unregisterNetwork(){
+
+    protected void unregisterNetwork() {
         try {
             unregisterReceiver(broadcastReceiver);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
 
+    // notification builder
+//    private void Notification() {
+//            // Create an explicit intent for an Activity in your app
+//            Intent intent = new Intent(this, MainActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+//
+//            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, String.valueOf(CHANNEL_ID))
+//                    .setSmallIcon(R.drawable.aquaphonic)
+//                    .setContentTitle("My notification")
+//                    .setContentText("Hello World!")
+//                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                // Set the intent that will fire when the user taps the notification
+//                .setContentIntent(pendingIntent)
+//                .setAutoCancel(true);
+//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//
+//        // notificationId is a unique int for each notification that you must define
+//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        int notificationId = 0;
+//        notificationManager.notify(notificationId, mBuilder.build());
+//    }
+
+    private void Notification() {
 
 
+    }
 
 
     @Override
