@@ -67,7 +67,8 @@ public class SensorFragment extends Fragment {
         ReadSensorData("PH", 3);
         ReadSensorData("Light Sensor", 4);
         ReadSensorData("Moisture Soil", 5);
-
+        // notification of sensor value
+        mMainActivity.Notification();
         return mView;
     }
 
