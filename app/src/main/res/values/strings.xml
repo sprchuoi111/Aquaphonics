@@ -36,6 +36,8 @@
     <string name="temperature">Temperature</string>
     <string name="water_levels">Water Levels</string>
     <string name="light_sensor">Light Sensor</string>
+    <string name="auto">Auto</string>
+    <string name="manual">Manual</string>
 
 
 </resources>
