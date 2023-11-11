@@ -1,0 +1,93 @@
+package com.example.aquasys.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.aquasys.MainActivity;
+import com.example.aquasys.R;
+import com.example.aquasys.listener.SelectListener;
+import com.example.aquasys.object.sensor;
+
+import java.util.List;
+
+public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.SensorViewHolder> {
+
+    private Context context;
+    private final List<sensor> mListSensor;
+    // Constructor for the SensorAdapter class
+    public SensorAdapter( List<sensor> mListSensor, SelectListener mOnClickItemListener) {
+        this.mListSensor = mListSensor;
+    }
+
+    @NonNull
+    @Override
+    public SensorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_sensor, parent, false);
+
+        return new SensorViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull SensorViewHolder holder, int position) {
+        sensor sen = mListSensor.get(position);
+        int itemPosition = holder.getAdapterPosition();
+        if (sen == null) {
+            return;
+        }
+        holder.tv_sensor.setText(sen.getName());
+
+        String sensorValue = sen.getValue(); // Get the original sensor value
+
+        switch (sen.getName()) {
+            case "Humidity":
+            case "Moisture Soil":
+                sensorValue = sensorValue + "%";
+                break;
+            case "Temperature":
+                sensorValue = sensorValue + "°C";
+                break;
+            case "Water level":
+                sensorValue = sensorValue + "cm";
+                break;
+        }
+
+        holder.tv_sensor_val.setText(sensorValue);
+        holder.img_sensor.setImageResource(sen.getImg());
+
+
+    }
+
+
+    @Override
+    public int getItemCount() {
+        return mListSensor.size();
+    }
+
+    // Create sensor view holder
+    public static class SensorViewHolder extends RecyclerView.ViewHolder{
+        private TextView tv_sensor;
+        private TextView tv_sensor_val;
+        private ImageView img_sensor ;
+
+        public SensorViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            LinearLayout layoutSensor = itemView.findViewById(R.id.sensor_content);
+            tv_sensor = itemView.findViewById(R.id.tv_sensor);
+            tv_sensor_val = itemView.findViewById(R.id.tv_sensor_val);
+            img_sensor  = itemView.findViewById(R.id.img_sensor);
+            MainActivity mainActivity = (MainActivity) itemView.getContext();
+
+        }
+    }
+
+}

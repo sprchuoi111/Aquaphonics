@@ -1,0 +1,104 @@
+package com.example.aquasys.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Toast;
+import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.aquasys.MainActivity;
+import com.example.aquasys.R;
+
+import com.example.aquasys.object.actuator;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdapter.TimerActuatorViewHolder>{
+
+    private Context context;
+    private final List<actuator> actuatorList;
+
+
+    public TimerActuatorAdapter(List<actuator> actuatorList) {
+        this.actuatorList = actuatorList;
+
+    }
+
+    @NonNull
+    @Override
+    public TimerActuatorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.timeractuator_layout, parent, false);
+        return new TimerActuatorViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull TimerActuatorViewHolder holder, int position) {
+        actuator act = actuatorList.get(position);
+        int itemPosition = holder.getAdapterPosition();
+        if(act == null)
+            return;
+        //set drawable effect for btn
+        switch (act.getName()) {
+            case "BULB 1":
+            case "BULB 2":
+                holder.btn_actuator.setBackgroundResource(R.drawable.btn_bulb1);
+                break;
+            case "PUMP 1":
+                holder.btn_actuator.setBackgroundResource(R.drawable.btn_pump);
+                break;
+            case "HEATER 1":
+                holder.btn_actuator.setBackgroundResource(R.drawable.btn_heater);
+                break;
+            default: break;
+
+        }
+
+
+        holder.btn_actuator.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                actuator.globalActuator_timer = null;
+                int itemPosition = holder.getAdapterPosition();
+                actuator act = actuatorList.get(itemPosition);
+
+                if (isChecked) {
+                    if (actuator.globalActuator_timer == null) {
+                        actuator.globalActuator_timer = new ArrayList<>();
+                    }
+                    actuator.globalActuator_timer.add(act);
+                } else {
+                    if (actuator.globalActuator_timer != null) {
+                        actuator.globalActuator_timer.remove(act);
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return actuatorList.size();
+    }
+
+    public static class TimerActuatorViewHolder extends RecyclerView.ViewHolder {
+        private final ToggleButton btn_actuator;
+        MainActivity mMainactivity;
+
+        public TimerActuatorViewHolder(@NonNull View itemView) {
+            super(itemView);
+            btn_actuator = itemView.findViewById(R.id.btn_actuator);
+            mMainactivity = (MainActivity) itemView.getContext();
+
+        }
+    }
+}
