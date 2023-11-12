@@ -43,7 +43,7 @@ public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdap
         //set drawable effect for btn
         switch (act.getType()) {
             case bulb:
-                holder.btn_actuator.setBackgroundResource(R.drawable.btn_bulb1);
+                    holder.btn_actuator.setBackgroundResource(R.drawable.btn_bulb1);
                 break;
             case pump:
                 holder.btn_actuator.setBackgroundResource(R.drawable.btn_pump);

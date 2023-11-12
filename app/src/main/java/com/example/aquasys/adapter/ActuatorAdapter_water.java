@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -64,10 +65,10 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                     holder.btn_actuator.setChecked(false);
                     act.setStatus(0);
                     Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                    holder.card_actuator.setCardBackgroundColor(whiteColor);
+                    holder.card_actuator.setBackgroundColor(whiteColor);
                 }
                 else {
-                    holder.card_actuator.setCardBackgroundColor(purpleColor);
+                    holder.card_actuator.setBackgroundColor(purpleColor);
                     act.setStatus(1);
                     Toast.makeText(holder.mMainActivity, act.getName() + String.format(",Duration : %02d:%02d ", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
                     //save actuator to firebase
@@ -75,7 +76,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                 }
             }
             else {
-                holder.card_actuator.setCardBackgroundColor(whiteColor);
+                holder.card_actuator.setBackgroundColor(whiteColor);
                 act.setStatus(0);
                 //save actuator to firebase
                 holder.mMainActivity.addActuatorToFireBase();
@@ -126,13 +127,13 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                     if(actuator.listActuator_water().get(itemPosition).getHour() == 0 && actuator.listActuator_water().get(itemPosition).getMinute() == 0 ){
                         holder.btn_actuator.setChecked(false);
                         act.setStatus(0);
-                        holder.card_actuator.setCardBackgroundColor(whiteColor);
+                        holder.card_actuator.setBackgroundColor(whiteColor);
                         //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
                         // save status back to actuator
                         holder.mMainActivity.addActuatorToFireBase();
                     }
                     else {
-                        holder.card_actuator.setCardBackgroundColor(purpleColor);
+                        holder.card_actuator.setBackgroundColor(purpleColor);
                         holder.btn_actuator.setChecked(true);
                         act.setStatus(1);
                     }
@@ -140,7 +141,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                 if(status == 0){
                     holder.btn_actuator.setChecked(false);
                     act.setStatus(0);
-                    holder.card_actuator.setCardBackgroundColor(whiteColor);
+                    holder.card_actuator.setBackgroundColor(whiteColor);
                 }
             }
             @Override
@@ -162,7 +163,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
         private final TextView tv_name_actuator;
         @SuppressLint("UseSwitchCompatOrMaterialCode")
         private final Switch btn_actuator;
-        private final CardView card_actuator;
+        private final LinearLayout card_actuator;
 
         private final MainActivity mMainActivity;
 

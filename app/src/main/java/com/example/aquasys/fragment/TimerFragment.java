@@ -127,6 +127,7 @@ public class TimerFragment extends Fragment {
 
         // setting mapping components in Dialog set timer
         FloatingActionButton btn_done = mViewDialog.findViewById(R.id.btn_done);
+        FloatingActionButton btn_close = mViewDialog.findViewById(R.id.btn_close);
         np_duration_hour_from = mViewDialog.findViewById(R.id.np_duration_hour_from);
         np_duration_minute_from = mViewDialog.findViewById(R.id.np_duration_minute_from);
         np_duration_hour_to = mViewDialog.findViewById(R.id.np_duration_hour_to);
@@ -173,6 +174,12 @@ public class TimerFragment extends Fragment {
                 Toast.makeText(getContext(), "Please Select Actuator !!", Toast.LENGTH_SHORT).show();
             }
 
+        });
+        btn_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.cancel();
+            }
         });
 
     }

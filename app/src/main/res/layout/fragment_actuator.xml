@@ -10,25 +10,31 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tv_actuator_environment"
         android:text="@string/environment"
+        android:padding="10dp"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:textColor="@color/blue"/>
+        android:textColor="@color/blue"
+        android:background="#F2FFE9"
+
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/recyclerview_adapter_environment"/>
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tv_actuator_water"
         android:text="@string/water"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:textColor="@color/blue"/>
+        android:textColor="@color/blue"
+        android:background="#F2FFE9"
+        android:padding="10dp"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,8 +47,8 @@
         android:contentDescription="@string/add_actuator"
         android:src="@drawable/add"
         android:layout_gravity="bottom|end"
-        android:layout_margin="30dp"
-        android:backgroundTint="#A3B763"
+        android:layout_margin="20dp"
+        android:backgroundTint="#B4BDFF"
         android:id="@+id/btn_add_actuator"/>
 
 </FrameLayout>
