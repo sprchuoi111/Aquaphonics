@@ -74,9 +74,9 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.SensorView
 
     // Create sensor view holder
     public static class SensorViewHolder extends RecyclerView.ViewHolder{
-        private TextView tv_sensor;
-        private TextView tv_sensor_val;
-        private ImageView img_sensor ;
+        private final TextView tv_sensor;
+        private final TextView tv_sensor_val;
+        private final ImageView img_sensor ;
 
         public SensorViewHolder(@NonNull View itemView) {
             super(itemView);

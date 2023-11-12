@@ -1,7 +1,8 @@
 package com.example.aquasys.adapter;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,20 +20,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
-import com.example.aquasys.object.actuator;
 import com.example.aquasys.listener.SelectListenerActuator;
+import com.example.aquasys.object.actuator;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+
 import java.util.List;
 
-public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.ActuatorViewHolder>{
+public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_water.ActuatorViewHolder> {
 
-    private Context context;
-    private final List<actuator>  actuatorList;
-    //create constructor for actuatorList
 
-    public ActuatorAdapter( List<actuator> actuatorList ,SelectListenerActuator selectListenerActuator) {
+    private final List<actuator> actuatorList;
+
+    public ActuatorAdapter_water(List<actuator> actuatorList , SelectListenerActuator selectListenerActuator) {
         this.actuatorList = actuatorList;
     }
 
@@ -43,6 +44,7 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
         return new ActuatorViewHolder(view);
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull ActuatorViewHolder holder, int position) {
         actuator act = actuatorList.get(position);
@@ -107,45 +109,6 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
             AlertDialog dialog = builder.create();
             dialog.show();
         });
-        // update realtime actuator for tree in firebase
-        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("status").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int status = snapshot.getValue(int.class);
-                actuator.listActuator_environment().get(itemPosition).setStatus(status);
-                // set list for sensor adapter
-                // Check realtime state
-                //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
-                // change state of button
-                int purpleColor = ContextCompat.getColor(holder.mMainActivity, R.color.purple);
-                int whiteColor = ContextCompat.getColor(holder.mMainActivity, R.color.white);
-                if(status == 1 ) {
-                    if(actuator.listActuator_environment().get(itemPosition).getHour() == 0 && actuator.listActuator_environment().get(itemPosition).getMinute() == 0 ){
-                        holder.btn_actuator.setChecked(false);
-                        holder.card_actuator.setCardBackgroundColor(whiteColor);
-                        act.setStatus(0);
-                        Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                        // save status back to actuator
-                        holder.mMainActivity.addActuatorToFireBase();
-                    }
-                    else {
-                        holder.card_actuator.setCardBackgroundColor(purpleColor);
-                        holder.btn_actuator.setChecked(true);
-                        act.setStatus(1);
-                    }
-                }
-                if(status == 0){
-                    holder.btn_actuator.setChecked(false);
-                    act.setStatus(0);
-                    holder.card_actuator.setCardBackgroundColor(whiteColor);
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(holder.mMainActivity, "Error when read data" , Toast.LENGTH_SHORT).show();
-            }
-
-        });
 
         // update realtime actuator for fish in firebase
         holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).child("status").addValueEventListener(new ValueEventListener() {
@@ -189,22 +152,21 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
 
     }
 
-
-
     @Override
     public int getItemCount() {
         return actuatorList.size();
     }
-    public class ActuatorViewHolder extends RecyclerView.ViewHolder{
-        private ImageView img_actuator;
-        private TextView tv_name_actuator;
-        private Switch btn_actuator;
-        private CardView card_actuator;
 
-        private MainActivity mMainActivity;
+    public static class ActuatorViewHolder extends RecyclerView.ViewHolder{
+        private final ImageView img_actuator;
+        private final TextView tv_name_actuator;
+        @SuppressLint("UseSwitchCompatOrMaterialCode")
+        private final Switch btn_actuator;
+        private final CardView card_actuator;
 
-        private Button btn_set_duration;
+        private final MainActivity mMainActivity;
 
+        private final Button btn_set_duration;
         public ActuatorViewHolder(@NonNull View itemView) {
             super(itemView);
             img_actuator = itemView.findViewById(R.id.img_actuator);
@@ -215,6 +177,4 @@ public class ActuatorAdapter extends RecyclerView.Adapter<ActuatorAdapter.Actuat
             btn_set_duration = itemView.findViewById(R.id.btn_set_duration);
         }
     }
-
-
 }

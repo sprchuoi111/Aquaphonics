@@ -43,5 +43,9 @@
     <string name="emvironment">Emvironment</string>
     <string name="environment">Environment</string>
     <string name="water">Water</string>
+    <string name="add_actuator">ADD_Actuator</string>
+    <string name="for_environment">For Environment</string>
+    <string name="for_fish">for_fish</string>
+    <string name="description">Description</string>
 
 </resources>

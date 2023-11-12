@@ -4,39 +4,37 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
-
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
-
 import com.example.aquasys.object.actuator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdapter.TimerActuatorViewHolder>{
+public class ActuatorAdapter_add extends RecyclerView.Adapter<ActuatorAdapter_add.ActuatorViewHolder> {
 
     private final List<actuator> actuatorList;
 
-
-    public TimerActuatorAdapter(List<actuator> actuatorList) {
+    public ActuatorAdapter_add(List<actuator> actuatorList) {
         this.actuatorList = actuatorList;
-
     }
 
     @NonNull
     @Override
-    public TimerActuatorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.timeractuator_layout, parent, false);
-        return new TimerActuatorViewHolder(view);
+    public ActuatorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.addactuator_layout, parent, false);
+        return new ActuatorViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TimerActuatorViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ActuatorViewHolder holder, int position) {
         actuator act = actuatorList.get(position);
         if(act == null)
             return;
@@ -56,8 +54,6 @@ public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdap
                 break;
             default: break;
 
-
-
         }
 
 
@@ -70,19 +66,17 @@ public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdap
                 actuator act = actuatorList.get(itemPosition);
 
                 if (isChecked) {
-                    if (actuator.globalActuator_timer == null) {
-                        actuator.globalActuator_timer = new ArrayList<>();
+                    if (actuator.globalActuator_add == null) {
+                        actuator.globalActuator_add = new ArrayList<>();
                     }
-                    actuator.globalActuator_timer.add(act);
+                    actuator.globalActuator_add.add(act);
                 } else {
-                    if (actuator.globalActuator_timer != null) {
-                        actuator.globalActuator_timer.remove(act);
+                    if (actuator.globalActuator_add != null) {
+                        actuator.globalActuator_add.remove(act);
                     }
                 }
             }
         });
-
-
     }
 
     @Override
@@ -90,15 +84,14 @@ public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdap
         return actuatorList.size();
     }
 
-    public static class TimerActuatorViewHolder extends RecyclerView.ViewHolder {
+    public static class ActuatorViewHolder extends RecyclerView.ViewHolder{
+
         private final ToggleButton btn_actuator;
         MainActivity mMainactivity;
-
-        public TimerActuatorViewHolder(@NonNull View itemView) {
+        public ActuatorViewHolder(@NonNull View itemView) {
             super(itemView);
             btn_actuator = itemView.findViewById(R.id.btn_actuator);
             mMainactivity = (MainActivity) itemView.getContext();
-
         }
     }
 }
