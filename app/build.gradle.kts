@@ -48,4 +48,6 @@ dependencies {
     // circle img
     implementation ("de.hdodenhof:circleimageview:3.1.0")
 
+    implementation ("com.ismaeldivita.chipnavigation:chip-navigation-bar:1.3.3")
+
 }

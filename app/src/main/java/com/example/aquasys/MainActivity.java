@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -45,7 +46,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String CHANNEL_ID = "notify";
     // create for current fragment
     private int mCurrentFragment = FRAGMENT_SENSOR;
-    private BottomNavigationView bottom_navi; // Declare a BottomNavigationView variable.
+
+    private ChipNavigationBar bottom_navi;
     private ViewPager2 mViewPager; // Declare a ViewPager2 variable.
 
     private DrawerLayout drawer_layout; // Declare a DrawerLayout variable.
@@ -113,18 +115,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigation_view.setNavigationItemSelectedListener(this);
 
         // Set up click events for the items in the BottomNavigationView.
-        bottom_navi.setOnItemSelectedListener(item -> {
-            // Handle item clicks in the BottomNavigationView.
-            int id = item.getItemId();
-            if (id == R.id.active_sensor) {
-                openSensorFragment();
-            } else if (id == R.id.active_actuator) {
-                openActuatorFragment();
-            } else if (id == R.id.active_timer) {
-                openTimerFragment();
-            }
-            return true;
+        bottom_navi.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
+              @Override
+              public void onItemSelected(int id) {
+                  if (id == R.id.active_sensor) {
+                      openSensorFragment();
+                  } else if (id == R.id.active_actuator) {
+                      openActuatorFragment();
+                  } else if (id == R.id.active_timer) {
+                      openTimerFragment();
+                  }
+              }
         });
+
 
 
         // Set up a callback for ViewPager page changes.
@@ -137,17 +140,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     case 0:
                         mCurrentFragment = FRAGMENT_SENSOR; //sửa trạng thái của biến mCurrentFragment thành FRAGMENT_SENSOR
                         navigation_view.getMenu().findItem(R.id.active_sensor).setChecked(true);
-                        bottom_navi.getMenu().findItem(R.id.active_sensor).setChecked(true);
+                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_sensor).getItemId(),true);
                         break;
                     case 1:
                         mCurrentFragment = FRAGMENT_ACTUATOR; //sửa trạng thái của biến mCurrentFragment thành FRAGMENT_ACTUATOR
                         navigation_view.getMenu().findItem(R.id.active_actuator).setChecked(true);
-                        bottom_navi.getMenu().findItem(R.id.active_actuator).setChecked(true);
+                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_actuator).getItemId(),true);
                         break;
                     case 2:
                         mCurrentFragment = FRAGMENT_TIMER; //sửa trạng thái của biến mCurrentFragment thành FRAGMENT_TIMER
                         navigation_view.getMenu().findItem(R.id.active_timer).setChecked(true);
-                        bottom_navi.getMenu().findItem(R.id.active_timer).setChecked(true);
+                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_timer).getItemId(),true);
                         break;
                 }
             }
@@ -198,13 +201,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         if (id == R.id.active_sensor) {
             openSensorFragment();
-            bottom_navi.getMenu().findItem(R.id.active_sensor).setChecked(true);
+            bottom_navi.setItemSelected(id,true);
         } else if (id == R.id.active_actuator) {
             openActuatorFragment();
-            bottom_navi.getMenu().findItem(R.id.active_actuator).setChecked(true);
+            bottom_navi.setItemSelected(id,true);
         } else if (id == R.id.active_timer) {
             openTimerFragment();
-            bottom_navi.getMenu().findItem(R.id.active_timer).setChecked(true);
+            bottom_navi.setItemSelected(id,true);
         } else if (id == R.id.logout) {
             // Sign out the user and redirect to the login page
             FirebaseAuth.getInstance().signOut();
