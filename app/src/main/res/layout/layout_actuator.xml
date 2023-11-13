@@ -1,4 +1,4 @@
-    <?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -20,7 +20,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.047"
             app:layout_constraintStart_toStartOf="parent"
-            tools:layout_editor_absoluteY="0dp">
+            tools:layout_editor_absoluteY="0dp"
+            tools:ignore="MissingConstraints">
 
             <ImageView
                 android:id="@+id/img_actuator"
@@ -53,7 +54,7 @@
             app:layout_constraintHorizontal_bias="0.99"
             app:layout_constraintStart_toEndOf="@+id/linearLayout"
             tools:layout_editor_absoluteY="0dp"
-            />
+            tools:ignore="MissingConstraints" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
