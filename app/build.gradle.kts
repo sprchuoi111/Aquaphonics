@@ -17,18 +17,17 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
+allprojects {
+    repositories {
+        // Other repositories...
 
+    }
+}
 dependencies {
 
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -47,5 +46,7 @@ dependencies {
     implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.28")
     // circle img
     implementation ("de.hdodenhof:circleimageview:3.1.0")
+
+    implementation ("com.github.ismaeldivita:chip-navigation-bar:1.4.0")
 
 }
