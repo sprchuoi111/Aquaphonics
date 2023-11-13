@@ -47,5 +47,6 @@ dependencies {
     implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.28")
     // circle img
     implementation ("de.hdodenhof:circleimageview:3.1.0")
+    implementation ("com.ismaeldivita.chipnavigation:chip-navigation-bar:1.3.3")
 
 }

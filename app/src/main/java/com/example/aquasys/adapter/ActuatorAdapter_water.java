@@ -13,9 +13,11 @@ import android.widget.NumberPicker;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -163,11 +165,12 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
         private final TextView tv_name_actuator;
         @SuppressLint("UseSwitchCompatOrMaterialCode")
         private final Switch btn_actuator;
-        private final LinearLayout card_actuator;
+        private final ConstraintLayout card_actuator;
 
         private final MainActivity mMainActivity;
 
-        private final Button btn_set_duration;
+        @SuppressLint("UseSwitchCompatOrMaterialCode")
+        private final ToggleButton btn_set_duration;
         public ActuatorViewHolder(@NonNull View itemView) {
             super(itemView);
             img_actuator = itemView.findViewById(R.id.img_actuator);
