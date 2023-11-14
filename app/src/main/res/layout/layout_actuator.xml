@@ -3,10 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
+
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card_actuator"
-    android:padding="10dp"
+
     >
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
@@ -16,8 +15,9 @@
         android:layout_height="wrap_content"
        android:layout_margin="10dp"
         app:cardCornerRadius="30dp"
-        app:cardBackgroundColor="@color/mid_blue"
-        tools:ignore="MissingConstraints">
+        app:cardBackgroundColor="@color/off_actuator"
+        tools:ignore="MissingConstraints"
+        android:id="@+id/card_actuator">
 
 
 
@@ -26,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_margin="20dp"
+                android:layout_margin="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.047"
                 app:layout_constraintStart_toStartOf="parent"
@@ -35,9 +35,10 @@
 
                 <ImageView
                     android:id="@+id/img_actuator"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="20dp" />
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="20dp"
+                    />
 
                 <TextView
                     android:id="@+id/tv_name_actuator"
@@ -45,13 +46,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="30dp"
                     android:text="@string/actuator"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textSize="20dp"/>
 
                 <Switch
                     android:id="@+id/btn_actuator"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:ignore="UseSwitchCompatOrMaterialXml" />
+                    android:layout_width="85dp"
+                    android:layout_height="60dp"
+                    tools:ignore="UseSwitchCompatOrMaterialXml"
+                    android:track="@drawable/switch_actuator_track"
+                    android:thumb="@drawable/switch_actuator_thumb"
+                    />
             </LinearLayout>
 
             <ToggleButton

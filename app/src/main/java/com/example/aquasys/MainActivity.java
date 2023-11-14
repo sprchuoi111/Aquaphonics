@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Button btn_update = new Button(this);
         btn_update.setBackgroundResource(R.drawable.update);
         Toolbar.LayoutParams l3 = new Toolbar.LayoutParams(Toolbar.LayoutParams.WRAP_CONTENT, Toolbar.LayoutParams.WRAP_CONTENT);
-        btn_update.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+        btn_update.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.black)));
         l3.gravity = Gravity.END;
         l3.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics()); // Set width to 60dp
         l3.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics()); // Set height to 60dp

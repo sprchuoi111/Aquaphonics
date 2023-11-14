@@ -3,6 +3,7 @@ package com.example.aquasys.adapter;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,29 +58,63 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
         }
         holder.img_actuator.setImageResource(act.getImg());
         holder.tv_name_actuator.setText(act.getName());
+        int img_actuator_on = R.drawable.ic_launcher_background;
+        int img_actuator_off = R.drawable.ic_launcher_background;
+        //set drawable effect for btn
+        switch (act.getType()) {
+            case bulb:
+                img_actuator_on = R.drawable.light_bulb_on;
+                img_actuator_off = R.drawable.lightbulb;
+                break;
+            case pump:
+                img_actuator_on = R.drawable.water_pump_on;
+                img_actuator_off = R.drawable.water_pump;
 
-
+                break;
+            case heater:
+                img_actuator_on = R.drawable.fish_feeder_on;
+                img_actuator_off = R.drawable.fish_feeder;
+                break;
+            case feeder:
+                img_actuator_on = R.drawable.heater_on;
+                img_actuator_off = R.drawable.heater;
+                break;
+            default:
+                break;
+        }
+        int finalImg_actuator_on = img_actuator_on;
+        int finalImg_actuator_off = img_actuator_off;
         holder.btn_actuator.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            int purpleColor = ContextCompat.getColor(holder.mMainActivity, R.color.purple);
-            int whiteColor = ContextCompat.getColor(holder.mMainActivity, R.color.white);
+            int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
+            int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
             if(isChecked) {
                 if(act.getHour() == 0 && act.getMinute() == 0 ){
                     holder.btn_actuator.setChecked(false);
                     act.setStatus(0);
                     Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                    holder.card_actuator.setBackgroundColor(whiteColor);
+                    holder.card_actuator.setCardBackgroundColor(off_actuator);
+                    holder.img_actuator.setImageResource(finalImg_actuator_off);
+                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
                 }
                 else {
-                    holder.card_actuator.setBackgroundColor(purpleColor);
+                    holder.card_actuator.setCardBackgroundColor(on_actuator);
                     act.setStatus(1);
                     Toast.makeText(holder.mMainActivity, act.getName() + String.format(",Duration : %02d:%02d ", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
+                    holder.img_actuator.setImageResource(finalImg_actuator_on);
                     //save actuator to firebase
                     holder.mMainActivity.addActuatorToFireBase();
+                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
+
+
                 }
             }
             else {
-                holder.card_actuator.setBackgroundColor(whiteColor);
+                holder.card_actuator.setCardBackgroundColor(off_actuator);
                 act.setStatus(0);
+                holder.img_actuator.setImageResource(finalImg_actuator_off);
+                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
                 //save actuator to firebase
                 holder.mMainActivity.addActuatorToFireBase();
             }
@@ -123,27 +158,36 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                 // Check realtime state
                 //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
                 // change state of button
-                int purpleColor = ContextCompat.getColor(holder.mMainActivity, R.color.purple);
-                int whiteColor = ContextCompat.getColor(holder.mMainActivity, R.color.white);
+                int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
+                int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
                 if(status == 1 ) {
                     if(actuator.listActuator_water().get(itemPosition).getHour() == 0 && actuator.listActuator_water().get(itemPosition).getMinute() == 0 ){
                         holder.btn_actuator.setChecked(false);
                         act.setStatus(0);
-                        holder.card_actuator.setBackgroundColor(whiteColor);
+                        holder.img_actuator.setImageResource(finalImg_actuator_off);
+                        holder.card_actuator.setCardBackgroundColor(off_actuator);
+                        holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
                         //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
                         // save status back to actuator
                         holder.mMainActivity.addActuatorToFireBase();
                     }
                     else {
-                        holder.card_actuator.setBackgroundColor(purpleColor);
+                        holder.card_actuator.setCardBackgroundColor(on_actuator);
                         holder.btn_actuator.setChecked(true);
+                        holder.img_actuator.setImageResource(finalImg_actuator_on);
+                        holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
+
                         act.setStatus(1);
                     }
                 }
                 if(status == 0){
                     holder.btn_actuator.setChecked(false);
                     act.setStatus(0);
-                    holder.card_actuator.setBackgroundColor(whiteColor);
+                    holder.img_actuator.setImageResource(finalImg_actuator_off);
+                    holder.card_actuator.setCardBackgroundColor(off_actuator);
+                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
                 }
             }
             @Override
@@ -165,7 +209,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
         private final TextView tv_name_actuator;
         @SuppressLint("UseSwitchCompatOrMaterialCode")
         private final Switch btn_actuator;
-        private final ConstraintLayout card_actuator;
+        private final CardView card_actuator;
 
         private final MainActivity mMainActivity;
 

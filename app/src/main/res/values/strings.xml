@@ -40,12 +40,11 @@
     <string name="manual">Manual</string>
     <string name="environment_monitor">Environment Monitor</string>
     <string name="water_quality_monitor">Water-Quality Monitor</string>
-    <string name="emvironment">Emvironment</string>
-    <string name="environment">Environment</string>
-    <string name="water">Water</string>
+    <string name="environment">ENVIRONMENT</string>
+    <string name="water">WATER</string>
     <string name="add_actuator">ADD_Actuator</string>
-    <string name="for_environment">For Environment</string>
-    <string name="for_fish">for_fish</string>
+    <string name="for_environment">FOR ENVIRONMENT</string>
+    <string name="for_fish">FOR FISH</string>
     <string name="description">Description</string>
 
 </resources>

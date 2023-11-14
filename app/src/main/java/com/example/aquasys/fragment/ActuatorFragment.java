@@ -149,16 +149,16 @@ public class ActuatorFragment extends Fragment {
         });
 
         recyclerview_adapter_environment = mView.findViewById(R.id.recyclerview_adapter_environment);
-
         recyclerview_adapter_water = mView.findViewById(R.id.recyclerview_adapter_water);
-        // setting show the managerList manager recyclerView for actuator
-        LinearLayoutManager linearLayoutManager_environment  = new LinearLayoutManager(mMainActivity);
-        LinearLayoutManager linearLayoutManager_water  = new LinearLayoutManager(mMainActivity);
-        // set Gridlayout for adapter
-        // for environment
-        recyclerview_adapter_environment.setLayoutManager(linearLayoutManager_environment);
-        // for water
-        recyclerview_adapter_water.setLayoutManager(linearLayoutManager_water   );
+
+// Setting GridLayoutManager with 2 columns for environment
+        GridLayoutManager gridLayoutManager_environment = new GridLayoutManager(mMainActivity, 2);
+        recyclerview_adapter_environment.setLayoutManager(gridLayoutManager_environment);
+
+// Setting GridLayoutManager with 2 columns for water
+        GridLayoutManager gridLayoutManager_water = new GridLayoutManager(mMainActivity, 2);
+        recyclerview_adapter_water.setLayoutManager(gridLayoutManager_water);
+
 
 
 

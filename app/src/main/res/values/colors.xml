@@ -8,4 +8,11 @@
     <color name="red">#D80032</color>
     <color name="green">#D2DE32</color>
     <color name="mid_blue">#E0F4FF</color>
+    <color name="off_actuator">#FFFFFFFF</color>
+    <color name="on_actuator">#576CBC</color>
+    <color name="icon_actuator_off">#FFFFFFFF</color>
+    <color name="icon_actuator_on">#F4E500</color>
+    <color name="tv_actuator_off">#FF000000</color>
+    <color name="tv_actuator_on">#F4E500</color>
+
 </resources>

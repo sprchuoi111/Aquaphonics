@@ -10,7 +10,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#ACFAAF"
+        app:cardBackgroundColor="#F3EEEA"
         app:cardElevation="20dp"
         app:cardCornerRadius="30dp"
         android:layout_margin="15dp"
@@ -27,8 +27,8 @@
         android:text="@string/environment_monitor"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:textColor="@color/blue"
-        android:background="@color/white"/>
+        android:textColor="@color/black"
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
         android:text="@string/water_quality_monitor"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:textColor="@color/blue"/>
+        android:textColor="@color/black"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
