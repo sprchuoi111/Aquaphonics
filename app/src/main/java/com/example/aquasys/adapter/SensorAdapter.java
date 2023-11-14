@@ -20,11 +20,13 @@ import java.util.List;
 
 public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.SensorViewHolder> {
 
+    private final SelectListener mOnClickItemListener;
     private Context context;
     private final List<sensor> mListSensor;
     // Constructor for the SensorAdapter class
     public SensorAdapter( List<sensor> mListSensor, SelectListener mOnClickItemListener) {
         this.mListSensor = mListSensor;
+        this.mOnClickItemListener = mOnClickItemListener;
     }
 
     @NonNull
@@ -62,6 +64,12 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.SensorView
 
         holder.tv_sensor_val.setText(sensorValue);
         holder.img_sensor.setImageResource(sen.getImg());
+        holder.layout_sensor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnClickItemListener.onClickItemSensor(sen, itemPosition);
+            }
+        });
 
 
     }
@@ -77,6 +85,7 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.SensorView
         private final TextView tv_sensor;
         private final TextView tv_sensor_val;
         private final ImageView img_sensor ;
+        LinearLayout layout_sensor;
 
         public SensorViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,6 +95,7 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.SensorView
             tv_sensor_val = itemView.findViewById(R.id.tv_sensor_val);
             img_sensor  = itemView.findViewById(R.id.img_sensor);
             MainActivity mainActivity = (MainActivity) itemView.getContext();
+            layout_sensor = itemView.findViewById(R.id.layout_sensor);
 
         }
     }

@@ -61,57 +61,43 @@ public class ActuatorFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // inflate layout for this fragment
+        // Inflate layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_actuator, container, false);
         mMainActivity = (MainActivity) getContext();
 
         // Add actuator button
         FloatingActionButton btn_add_actuator = mView.findViewById(R.id.btn_add_actuator);
-        // read from firebase when the first time open app
+
+        // Read from Firebase when the first time the app is opened
         Read_Data_fromFireBase_Actuator_Tree();
         Read_Data_fromFireBase_Actuator_Fish();
-
-        // display number actuator in list
         TextView tv_number_actuator_environment = mView.findViewById(R.id.tv_number_actuator_environment);
         TextView tv_number_actuator_water = mView.findViewById(R.id.tv_number_actuator_water);
 
-        int environmentActuatorSize = actuator.globalActuator_environment != null ? actuator.globalActuator_environment.size() : 0;
-        tv_number_actuator_environment.setText(+ environmentActuatorSize + " Devices");
-
-// Assuming there is a similar list for water actuators
-        int waterActuatorSize = actuator.globalActuator_water != null ? actuator.globalActuator_water.size() : 0;
-        tv_number_actuator_water.setText( waterActuatorSize + " Devices");
 
         btn_add_actuator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Set actuator list want to add to null
+                // Set actuator list to add to null
                 actuator.globalActuator_add = null;
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
                 @SuppressLint("InflateParams") View mViewDialog = mMainActivity.getLayoutInflater().inflate(R.layout.dialog_add_actuator, null);
                 builder.setView(mViewDialog);
                 builder.setTitle("Add actuator");
                 builder.setIcon(R.drawable.add);
 
-                // Mapping for components in dialog layout
+                // Mapping for components in the dialog layout
                 RecyclerView recyclerview_add_adapter_environment = mViewDialog.findViewById(R.id.recyclerview_add_adapter_environment);
                 RecyclerView recyclerview_add_adapter_water = mViewDialog.findViewById(R.id.recyclerview_add_adapter_water);
                 EditText edt_add_description = mViewDialog.findViewById(R.id.edt_add_description);
 
-                // Add data to RecyclerView
-                // Set GridLayoutManager
-                GridLayoutManager gridLayoutManager_water = new GridLayoutManager(mMainActivity, 2);
-                GridLayoutManager gridLayoutManager_environment = new GridLayoutManager(mMainActivity, 2);
-
-
                 // Set GridLayoutManager for RecyclerView
-                recyclerview_add_adapter_water.setLayoutManager(gridLayoutManager_water);
-                recyclerview_add_adapter_environment.setLayoutManager(gridLayoutManager_environment);
+                recyclerview_add_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
+                recyclerview_add_adapter_environment.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
 
-                // Set data for actuator in timer
-                // Actuator adapter for fish
+                // Set data for actuator in the timer
                 ActuatorAdapter_add actuatorAdapter_environment_add = new ActuatorAdapter_add(actuator.listActuator_environment_add());
-                // Actuator adapter for tree
                 ActuatorAdapter_add actuatorAdapter_water_add = new ActuatorAdapter_add(actuator.listActuator_water_add());
 
                 // Set RecyclerView with adapter
@@ -122,16 +108,19 @@ public class ActuatorFragment extends Fragment {
                     if (actuator.globalActuator_add != null && actuator.globalActuator_add.size() == 1) {
                         if (!edt_add_description.getText().toString().isEmpty()) {
                             actuator.globalActuator_add.get(0).setName(edt_add_description.getText().toString());
+
                             if (actuator.globalActuator_add.get(0).getType() == actuator.typeof_actuator.bulb) {
                                 actuator.globalActuator_environment.add(actuator.globalActuator_add.get(0));
                             } else {
                                 actuator.globalActuator_water.add(actuator.globalActuator_add.get(0));
                             }
+
                             int environmentActuatorSize = actuator.globalActuator_environment != null ? actuator.globalActuator_environment.size() : 0;
                             tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
-                            // Assuming there is a similar list for water actuators
+
                             int waterActuatorSize = actuator.globalActuator_water != null ? actuator.globalActuator_water.size() : 0;
                             tv_number_actuator_water.setText(waterActuatorSize + " Devices");
+
                             mMainActivity.addActuatorToFireBase();
                         } else {
                             // Display a toast when the conditions are not met
@@ -152,18 +141,21 @@ public class ActuatorFragment extends Fragment {
         recyclerview_adapter_water = mView.findViewById(R.id.recyclerview_adapter_water);
 
 // Setting GridLayoutManager with 2 columns for environment
-        GridLayoutManager gridLayoutManager_environment = new GridLayoutManager(mMainActivity, 2);
-        recyclerview_adapter_environment.setLayoutManager(gridLayoutManager_environment);
+        recyclerview_adapter_environment.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
 
 // Setting GridLayoutManager with 2 columns for water
-        GridLayoutManager gridLayoutManager_water = new GridLayoutManager(mMainActivity, 2);
-        recyclerview_adapter_water.setLayoutManager(gridLayoutManager_water);
+        recyclerview_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
+        // Display the number of environment actuators in the list
 
 
+        // Assuming there is a similar list for water actuators
+        int environmentActuatorSize = actuator.listActuator_environment() != null ? actuator.listActuator_environment().size() : 0;
+        tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
 
-
-
+        int waterActuatorSize = actuator.listActuator_water() != null ? actuator.listActuator_water().size() : 0;
+        tv_number_actuator_water.setText(waterActuatorSize + " Devices");
         return mView;
+
     }
 
     // read from firebase when the first time open app

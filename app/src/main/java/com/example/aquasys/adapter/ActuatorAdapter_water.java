@@ -197,6 +197,38 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
 
         });
 
+        // Remove Actuator
+        holder.card_actuator.setOnLongClickListener(new View.OnLongClickListener() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public boolean onLongClick(View v) {
+                // This method is called when positive button is clicked.
+                new AlertDialog.Builder(v.getContext())
+                        .setTitle("Delete Actuator") // Set title text for dialog.
+                        .setMessage("Are you sure you want to delete this Schedule?") // Set message text for dialog.
+                        // Add positive button to dialog with text "OK" and click listener.
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            //If 'currentPosition' is a valid position
+                            int itemPosition = holder.getAdapterPosition();
+                            if (itemPosition > 2) {
+                                // Remove the room at 'currentPosition' from mListRoom.
+                                actuatorList.remove(itemPosition);
+                                notifyDataSetChanged();
+                                holder.mMainActivity.addActuatorToFireBase();
+                            }
+                            else {Toast.makeText(holder.mMainActivity, "Can not remove this Actuator", Toast.LENGTH_SHORT).show();}
+
+                            })
+                        // Add negative button to dialog with text "Cancel" and null click listener.
+                        .setNegativeButton(android.R.string.cancel, null)
+                        // Set icon for dialog using a drawable resource.
+                        .setIcon(android.R.drawable.ic_menu_delete)
+                        // Show this dialog, adding it to the screen.
+                        .show();
+                return true;
+            }
+        });
+
     }
 
     @Override

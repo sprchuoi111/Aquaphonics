@@ -148,7 +148,6 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
             AlertDialog dialog = builder.create();
             dialog.show();
         });
-        // update realtime for firebase with Actuator
         holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("status").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -163,12 +162,12 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                 if(status == 1 ) {
                     if(actuator.listActuator_environment().get(itemPosition).getHour() == 0 && actuator.listActuator_environment().get(itemPosition).getMinute() == 0 ){
                         holder.btn_actuator.setChecked(false);
-                        holder.card_actuator.setCardBackgroundColor(off_actuator);
                         act.setStatus(0);
-                        Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
                         holder.img_actuator.setImageResource(finalImg_actuator_off);
+                        holder.card_actuator.setCardBackgroundColor(off_actuator);
                         holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
 
+                        //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
                         // save status back to actuator
                         holder.mMainActivity.addActuatorToFireBase();
                     }
@@ -195,6 +194,37 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                 Toast.makeText(holder.mMainActivity, "Error when read data" , Toast.LENGTH_SHORT).show();
             }
 
+        });
+        // Remove Actuator
+        holder.card_actuator.setOnLongClickListener(new View.OnLongClickListener() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public boolean onLongClick(View v) {
+                // This method is called when positive button is clicked.
+                new AlertDialog.Builder(v.getContext())
+                        .setTitle("Delete Actuator") // Set title text for dialog.
+                        .setMessage("Are you sure you want to delete this Schedule?") // Set message text for dialog.
+                        // Add positive button to dialog with text "OK" and click listener.
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            //If 'currentPosition' is a valid position
+                            int itemPosition = holder.getAdapterPosition();
+                            if (itemPosition > 3) {
+                                // Remove the room at 'currentPosition' from mListRoom.
+                                actuatorList.remove(itemPosition);
+                                notifyDataSetChanged();
+                                holder.mMainActivity.addActuatorToFireBase();
+                            }
+                            else {Toast.makeText(holder.mMainActivity, "Can not remove this Actuator", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        // Add negative button to dialog with text "Cancel" and null click listener.
+                        .setNegativeButton(android.R.string.cancel, null)
+                        // Set icon for dialog using a drawable resource.
+                        .setIcon(android.R.drawable.ic_menu_delete)
+                        // Show this dialog, adding it to the screen.
+                        .show();
+                return true;
+            }
         });
 
     }

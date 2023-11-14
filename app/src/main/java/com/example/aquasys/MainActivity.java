@@ -229,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bundle.putString("nameSensor", nameSensor);
         bundle.putInt("index", index);
         i.putExtras(bundle);
+        Toast.makeText(MainActivity.this , "test" , Toast.LENGTH_SHORT).show();
         //chuyển dữ liệu gồm tên phòng (key:NameRoom) và vị trí của phòng (key:index)
         startActivity(i);
     }

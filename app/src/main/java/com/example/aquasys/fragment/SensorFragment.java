@@ -65,9 +65,18 @@ public class SensorFragment extends Fragment {
         recyclerview_sensor_environment.setLayoutManager(gridLayoutManager_environment);
         // setting show water sensor
         recyclerview_sensor_water.setLayoutManager(gridLayoutManager_water);
-        sensorAdapter_environment =new SensorAdapter(sensor.listSensor_environment(), (sen, position) -> mMainActivity.goToSensorDevice(sen.getName(), position));
-        sensorAdapter_water =new SensorAdapter(sensor.listSensor_water(), (sen, position) -> mMainActivity.goToSensorDevice(sen.getName(), position));
-        //Set Sensor adapter
+        sensorAdapter_environment = new SensorAdapter(sensor.listSensor_environment(), new SelectListener() {
+            @Override
+            public void onClickItemSensor(sensor sen, int position) {
+                mMainActivity.goToSensorDevice(sen.getName(), position);
+            }
+        });
+        sensorAdapter_water = new SensorAdapter(sensor.listSensor_water(), new SelectListener() {
+            @Override
+            public void onClickItemSensor(sensor sen, int position) {
+                mMainActivity.goToSensorDevice(sen.getName(), position);
+            }
+        });        //Set Sensor adapter
         recyclerview_sensor_environment.setAdapter(sensorAdapter_environment);
         recyclerview_sensor_water.setAdapter(sensorAdapter_water);
         // Realtime database reading sensor check environment
@@ -122,7 +131,12 @@ public class SensorFragment extends Fragment {
                 if (value != null) {
                     sensor.listSensor_water().get(sensorIndex).setValue(value);
                     // set list for sensor adapter
-                    sensorAdapter_water =new SensorAdapter(sensor.listSensor_water(), (sen, position) -> mMainActivity.goToSensorDevice(sen.getName(), position));
+                    sensorAdapter_water = new SensorAdapter(sensor.listSensor_water(), new SelectListener() {
+                        @Override
+                        public void onClickItemSensor(sensor sen, int position) {
+                            mMainActivity.goToSensorDevice(sen.getName(), position);
+                        }
+                    });
                     //Set Sensor adapter
                     recyclerview_sensor_water.setAdapter(sensorAdapter_water);
                     // checking data
