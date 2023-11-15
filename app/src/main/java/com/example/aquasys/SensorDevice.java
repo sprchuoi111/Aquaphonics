@@ -97,6 +97,37 @@ public class SensorDevice extends AppCompatActivity {
                 }
             });
         }
+        if (  SensorType.equals("ph")
+                ||SensorType.equals("level_water"))
+        {
+            DatabaseReference ListRef = database.getReference("Sensors_water");
+            DatabaseReference SensorRef = ListRef.child(Integer.toString(index));
+            DatabaseReference ImgRef = SensorRef.child("img");
+
+            DatabaseReference statusRef = SensorRef.child("status");
+            statusRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        sensorStatus = snapshot.getValue(Integer.class);
+                        if(sensorStatus == 1)
+                        {
+                            sensorImgStatus.setImageResource(R.drawable.checked);
+                        }
+                        else if(sensorStatus == 0)
+                        {
+                            sensorImgStatus.setImageResource(R.drawable.cancel);
+                        }
+                        else sensorImgStatus.setImageResource(R.drawable.unknown);
+
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
     }
     public void setimgviewSensor()
     {
