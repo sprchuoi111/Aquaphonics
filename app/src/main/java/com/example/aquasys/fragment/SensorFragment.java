@@ -68,13 +68,14 @@ public class SensorFragment extends Fragment {
         sensorAdapter_environment = new SensorAdapter(sensor.listSensor_environment(), new SelectListener() {
             @Override
             public void onClickItemSensor(sensor sen, int position) {
-                mMainActivity.goToSensorDevice(sen.getName(), position);
+                mMainActivity.goToSensorDevice(sen.getName(), position,sen.getType());
+
             }
         });
         sensorAdapter_water = new SensorAdapter(sensor.listSensor_water(), new SelectListener() {
             @Override
             public void onClickItemSensor(sensor sen, int position) {
-                mMainActivity.goToSensorDevice(sen.getName(), position);
+                mMainActivity.goToSensorDevice(sen.getName(), position,sen.getType());
             }
         });        //Set Sensor adapter
         recyclerview_sensor_environment.setAdapter(sensorAdapter_environment);
@@ -107,11 +108,12 @@ public class SensorFragment extends Fragment {
                 if (value != null) {
                     sensor.listSensor_environment().get(sensorIndex).setValue(value);
                     // set list for sensor adapter
-                    sensorAdapter_environment =new SensorAdapter(sensor.listSensor_environment(), (sen, position) -> mMainActivity.goToSensorDevice(sen.getName(), position));
+                    sensorAdapter_environment =new SensorAdapter(sensor.listSensor_environment(),
+                            (sen, position) -> mMainActivity.goToSensorDevice(sen.getName(), position,sen.getType()));
                     //Set Sensor adapter
                     recyclerview_sensor_environment.setAdapter(sensorAdapter_environment);
                     // checking data
-                    //Toast.makeText(mMainActivity, sensorName + " Data Received : " +sensor.listSensor().get(sensorIndex).getValue(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(mMainActivity, sensorName + " Data Received : " +sensor.listSensor().gset(sensorIndex).getValue(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -134,7 +136,7 @@ public class SensorFragment extends Fragment {
                     sensorAdapter_water = new SensorAdapter(sensor.listSensor_water(), new SelectListener() {
                         @Override
                         public void onClickItemSensor(sensor sen, int position) {
-                            mMainActivity.goToSensorDevice(sen.getName(), position);
+                            mMainActivity.goToSensorDevice(sen.getName(), position,sen.getType());
                         }
                     });
                     //Set Sensor adapter

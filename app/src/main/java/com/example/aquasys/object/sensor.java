@@ -12,8 +12,8 @@ public class sensor {
     int status;
     typeofsensor type;
 
-    public typeofsensor getType() {
-        return type;
+    public String getType() {
+        return type.toString();
     }
 
     public void setType(typeofsensor type) {

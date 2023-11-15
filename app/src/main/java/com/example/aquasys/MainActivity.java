@@ -26,7 +26,6 @@ import com.example.aquasys.login.Login;
 import com.example.aquasys.object.actuator;
 import com.example.aquasys.object.sensor;
 import com.example.aquasys.object.timer;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -221,15 +220,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    public void goToSensorDevice(String nameSensor, int index) { //tạo phương thức chuyển hướng Fragment từ Room sang Device
+    public void goToSensorDevice(String nameSensor, int index , String typeSensor) { //tạo phương thức chuyển hướng Fragment từ Room sang Device
 
         //tạo Intent để chuyển từ MainActivity sang Device Activity đồng thời bundle dữ liệu sang
         Intent i = new Intent(this, SensorDevice.class);
         Bundle bundle = new Bundle();
         bundle.putString("nameSensor", nameSensor);
+        bundle.putString("typeSensor", typeSensor);
         bundle.putInt("index", index);
         i.putExtras(bundle);
-        Toast.makeText(MainActivity.this , "test" , Toast.LENGTH_SHORT).show();
         //chuyển dữ liệu gồm tên phòng (key:NameRoom) và vị trí của phòng (key:index)
         startActivity(i);
     }
