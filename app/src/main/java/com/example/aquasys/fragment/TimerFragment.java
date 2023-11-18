@@ -159,7 +159,7 @@ public class TimerFragment extends Fragment {
                 if ((hourFrom < hourTo) || (hourFrom == hourTo && minuteFrom < minuteTo)) {
                     for(int i = 0 ; i <actuator.globalActuator_timer.size() ; i++ )
                         // Add the timer
-                        timer.globalTimer.add(new timer(actuator.globalActuator_timer.get(i), hourFrom, minuteFrom, hourTo, minuteTo));
+                        timer.globalTimer.add(new timer(actuator.globalActuator_timer.get(i), hourFrom, minuteFrom, hourTo, minuteTo , 1));
                     recyclerview_timer.setAdapter(timerAdapter);
                     mMainActivity.addScheduleToFireBase();
                     dialog.cancel();

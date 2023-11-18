@@ -24,6 +24,7 @@ import com.example.aquasys.adapter.ActuatorAdapter_environment;
 import com.example.aquasys.adapter.ActuatorAdapter_water;
 import com.example.aquasys.adapter.TimerActuatorAdapter;
 import com.example.aquasys.object.actuator;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -40,6 +41,13 @@ public class ActuatorFragment extends Fragment {
 
     private ActuatorAdapter_water actuatorAdapter_water ; // adapter for the actuator
     private MainActivity mMainActivity ;
+
+    ExtendedFloatingActionButton btn_menu_actuator;
+    FloatingActionButton btn_edit_actuator;
+    FloatingActionButton btn_add_actuator;
+
+    // to check whether sub FABs are visible or not
+    Boolean isAllFabsVisible;
 
     public ActuatorFragment() {
         // Required empty public constructor
@@ -66,15 +74,144 @@ public class ActuatorFragment extends Fragment {
         mMainActivity = (MainActivity) getContext();
 
         // Add actuator button
-        FloatingActionButton btn_add_actuator = mView.findViewById(R.id.btn_add_actuator);
+        btn_add_actuator = mView.findViewById(R.id.btn_add_actuator);
+        btn_edit_actuator = mView.findViewById(R.id.btn_edit_actuator);
+        btn_menu_actuator = mView.findViewById(R.id.btn_menu_actuator);
+        // Now set all the FABs and all the action name
+        // texts as GONE
+        btn_add_actuator.setVisibility(View.GONE);
+        btn_edit_actuator.setVisibility(View.GONE);
 
+        // make the boolean variable as false, as all the
+        // action name texts and all the sub FABs are
+        // invisible
+        isAllFabsVisible = false;
+
+        // Set the Extended floating action button to
+        // shrinked state initially
+        btn_menu_actuator.shrink();
+        btn_menu_actuator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isAllFabsVisible) {
+                    // when isAllFabsVisible becomes
+                    // true make all the action name
+                    // texts and FABs VISIBLE.
+                    btn_add_actuator.show();
+                    btn_edit_actuator.show();
+                    // Now extend the parent FAB, as
+                    // user clicks on the shrinked
+                    // parent FAB
+                    btn_menu_actuator.extend();
+                    // make the boolean variable true as
+                    // we have set the sub FABs
+                    // visibility to GONE
+                    isAllFabsVisible = true;
+
+
+                }
+                else {
+                    // when isAllFabsVisible becomes
+                    // true make all the action name
+                    // texts and FABs GONE.
+                    btn_add_actuator.hide();
+                    btn_edit_actuator.hide();
+                    // Set the FAB to shrink after user
+                    btn_menu_actuator.shrink();
+                    // make the boolean variable false
+                    // as we have set the sub FABs
+                    // visibility to GONE
+                    isAllFabsVisible = false;
+                }
+            }
+        });
         // Read from Firebase when the first time the app is opened
         Read_Data_fromFireBase_Actuator_Tree();
         Read_Data_fromFireBase_Actuator_Fish();
         TextView tv_number_actuator_environment = mView.findViewById(R.id.tv_number_actuator_environment);
         TextView tv_number_actuator_water = mView.findViewById(R.id.tv_number_actuator_water);
+        // button delete actuator
+        btn_edit_actuator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Set actuator list to edit to null
+                actuator.globalActuator_edit = null;
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+                @SuppressLint("InflateParams") View mViewDialog = mMainActivity.getLayoutInflater().inflate(R.layout.dialog_edit_actuator, null);
+                builder.setView(mViewDialog);
+                builder.setTitle("Edit Actuator");
+                builder.setIcon(R.drawable.edit);
+
+                // Mapping for components in the dialog layout
+                RecyclerView recyclerview_edit_adapter_environment = mViewDialog.findViewById(R.id.recyclerview_edit_adapter_environment);
+                RecyclerView recyclerview_edit_adapter_water = mViewDialog.findViewById(R.id.recyclerview_edit_adapter_water);
+                EditText edt_edit_description = mViewDialog.findViewById(R.id.edt_edit_description);
+
+                // Set GridLayoutManager for RecyclerView
+                recyclerview_edit_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
+                recyclerview_edit_adapter_environment.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
+
+                // Set data for actuator in the timer
+                ActuatorAdapter_add actuatorAdapter_environment_add = new ActuatorAdapter_add(actuator.listActuator_environment());
+                ActuatorAdapter_add actuatorAdapter_water_add = new ActuatorAdapter_add(actuator.listActuator_water());
+
+                // Set RecyclerView with adapter
+                recyclerview_edit_adapter_environment.setAdapter(actuatorAdapter_environment_add);
+                recyclerview_edit_adapter_water.setAdapter(actuatorAdapter_water_add);
+
+                builder.setPositiveButton("Edit", (dialog, which) -> {
+                    if (actuator.globalActuator_edit != null && actuator.globalActuator_edit.size() == 1) {
+                        actuator editActuator = actuator.globalActuator_edit.get(0);
+
+                        // Check if the description is empty
+                        if (edt_edit_description.getText().toString().isEmpty()) {
+                            Toast.makeText(mMainActivity, "Please fill in the description field!", Toast.LENGTH_SHORT).show();
+                            return; // Exit the method if the description is empty
+                        }
+
+                        // Check the type of the actuator
+                        switch (editActuator.getType()) {
+                            case bulb:
+                                // Update the name in the environment actuator list
+                                actuator.globalActuator_environment.get(mMainActivity.pos_edit_actuator).setName(edt_edit_description.getText().toString());
+                                break;
+                            case pump:
+                            case heater:
+                            case feeder:
+                                // Update the name in the water actuator list
+                                actuator.globalActuator_water.get(mMainActivity.pos_edit_actuator).setName(edt_edit_description.getText().toString());
+                                break;
+                            // Add more cases if there are other types
+                            default:
+                                break;
+                        }
+
+                        // set list for sensor adapter
+                        actuatorAdapter_environment = new ActuatorAdapter_environment(actuator.listActuator_environment(), (act, position) -> {
+                        });
+                        recyclerview_adapter_environment.setAdapter(actuatorAdapter_environment);
+                        // set list for sensor adapter
+                        actuatorAdapter_water = new ActuatorAdapter_water(actuator.listActuator_water(), (act, position) -> {
+                        });
+                        recyclerview_adapter_water.setAdapter(actuatorAdapter_water);
+                        // Notify Firebase about the changes
+                        mMainActivity.addActuatorToFireBase();
+                    } else {
+                        Toast.makeText(mMainActivity, "Please choose an adapter again, select only 1 adapter!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                mMainActivity.pos_edit_actuator = 0;
+                builder.setNegativeButton("Cancel", null);
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
 
 
+        // button add actuator
         btn_add_actuator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

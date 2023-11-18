@@ -32,7 +32,6 @@ public class actuator {
         this.status = status;
         this.type = type;
     }
-
     public typeof_actuator getType() {
         return type;
     }
@@ -89,6 +88,7 @@ public class actuator {
     public static List<actuator> globalActuator_timer = new ArrayList<>();
 
     public static List<actuator> globalActuator_add = new ArrayList<>();
+    public static List<actuator> globalActuator_edit = new ArrayList<>();
     // actuator environment
     public static List<actuator> listActuator_environment(){
         if(globalActuator_environment.isEmpty()){

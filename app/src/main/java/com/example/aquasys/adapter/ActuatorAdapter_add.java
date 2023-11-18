@@ -69,7 +69,12 @@ public class ActuatorAdapter_add extends RecyclerView.Adapter<ActuatorAdapter_ad
                     if (actuator.globalActuator_add == null) {
                         actuator.globalActuator_add = new ArrayList<>();
                     }
+                    if (actuator.globalActuator_edit == null) {
+                    }
+                    actuator.globalActuator_edit = new ArrayList<>();
                     actuator.globalActuator_add.add(act);
+                    actuator.globalActuator_edit.add(act);
+                    holder.mMainactivity.pos_edit_actuator = itemPosition;
                 } else {
                     if (actuator.globalActuator_add != null) {
                         actuator.globalActuator_add.remove(act);

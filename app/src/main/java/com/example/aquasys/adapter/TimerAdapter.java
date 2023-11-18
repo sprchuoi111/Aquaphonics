@@ -3,21 +3,31 @@ package com.example.aquasys.adapter;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 
+import android.content.res.ColorStateList;
+import android.media.TimedText;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.NumberPicker;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
 import com.example.aquasys.listener.SelectListenerTimer;
+import com.example.aquasys.object.actuator;
 import com.example.aquasys.object.timer;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -41,15 +51,71 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
     @Override
     public void onBindViewHolder(@NonNull TimerViewHolder holder, int position) {
         timer tim = timerList.get(position);
+        //get the position of the item in timerlist
+        int currentPosition = holder.getAdapterPosition();
         if(tim == null){
             return;
         }
+
         holder.tv_name_timer_act.setText(tim.getAct().getName());
         @SuppressLint("DefaultLocale") String time = String.format("%02d:%02d-%02d:%02d",
                 tim.getTime_start_hour(), tim.getTime_start_minute(),
                 tim.getTime_stop_hour(), tim.getTime_stop_minute());
         holder.tv_timer_set.setText(time);
-        holder.btn_clear_timer.setOnClickListener(v -> {
+        //Update realtime status schedule
+        holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(currentPosition)).child("status").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    int status = snapshot.getValue(Integer.class);
+
+                    // Verify that the tim object is not null
+                    if (tim != null) {
+                        int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
+                        int onTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.white);
+
+                        if (status == 1) {
+                            if (timer.getGlobalTimer().get(currentPosition).getTime_stop_minute() == 0
+                                    && timer.globalTimer.get(currentPosition).getTime_start_minute() == 0
+                                    && timer.globalTimer.get(currentPosition).getTime_stop_hour() == 0
+                                    && timer.globalTimer.get(currentPosition).getTime_start_hour() == 0) {
+                                holder.btn_timer_on_off.setChecked(false);
+                                tim.setStatus(0);
+                                holder.card_timer.setCardBackgroundColor(offTimerColor);
+                            } else {
+                                holder.btn_timer_on_off.setChecked(true);
+                                tim.setStatus(1);
+                                holder.card_timer.setCardBackgroundColor(onTimerColor);
+                            }
+                        } else if (status == 0) {
+                            holder.btn_timer_on_off.setChecked(false);
+                            tim.setStatus(0);
+                            holder.card_timer.setCardBackgroundColor(offTimerColor);
+                        }
+
+                        // Save status back to actuator
+                        holder.mMainActivity.addScheduleToFireBase();
+                    }
+                } else {
+                    // Handle the case when the status data is not found
+                    // You may want to set some default values or take appropriate action
+                    // For example, setting the default status to 0 and updating the UI accordingly
+                    holder.btn_timer_on_off.setChecked(false);
+                    tim.setStatus(0);
+                    int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
+                    holder.card_timer.setCardBackgroundColor(offTimerColor);
+                    holder.mMainActivity.addScheduleToFireBase();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        holder.card_timer.setOnLongClickListener(v -> {
             // Get adapter position of ViewHolder in RecyclerView and assign it to 'currentPosition'.;
 
             // Create a builder for an alert dialog that uses default alert dialog theme.
@@ -74,10 +140,10 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                     .setIcon(android.R.drawable.ic_menu_delete)
                     // Show this dialog, adding it to the screen.
                     .show();
+            return true;
         });
-        holder.btn_edit_timer.setOnClickListener(v -> {
+        holder.card_timer.setOnClickListener(v -> {
             // get current position
-            int currentPosition = holder.getAdapterPosition();
             AlertDialog.Builder builder = new AlertDialog.Builder(holder.mMainActivity);
             View  diaLogView = holder.mMainActivity.getLayoutInflater().inflate(R.layout.dialog_edit_timer, null);
             builder.setView(diaLogView);
@@ -127,6 +193,39 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
             dialog.show();
 
         });
+
+        // setting enable for the button
+        holder.btn_timer_on_off.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                int adapterPosition = holder.getAdapterPosition();
+
+                // Check if the adapter position is valid
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    if (isChecked) {
+                        // Change the color of the card timer
+                        int color = ContextCompat.getColor(holder.mMainActivity, R.color.white);
+                        holder.card_timer.setCardBackgroundColor(color);
+
+                        // Change the status of the item in the list
+                        timerList.get(adapterPosition).setStatus(1);
+                        holder.mMainActivity.addScheduleToFireBase();
+                    } else {
+                        // Change the color of the card timer
+                        int color = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
+                        holder.card_timer.setCardBackgroundColor(color);
+
+                        // Change the status of the item in the list
+                        timerList.get(adapterPosition).setStatus(0);
+                        holder.mMainActivity.addScheduleToFireBase();
+                    }
+                }
+            }
+        });
+
+
+
+
     }
 
 
@@ -136,17 +235,18 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
     }
     public static class TimerViewHolder extends RecyclerView.ViewHolder{
 
-        private final Button btn_clear_timer;
-        private final Button btn_edit_timer;
         private final TextView tv_name_timer_act;
         private final TextView tv_timer_set;
         private final MainActivity mMainActivity;
+        private final  Switch btn_timer_on_off;
+
+        private final CardView card_timer;
         public TimerViewHolder(@NonNull View itemView) {
             super(itemView);
             tv_name_timer_act = itemView.findViewById(R.id.tv_name_timer_act);
             tv_timer_set = itemView.findViewById(R.id.tv_timer_set);
-            btn_clear_timer = itemView.findViewById(R.id.btn_clear_timer);
-            btn_edit_timer = itemView.findViewById(R.id.btn_edit_timer);
+            btn_timer_on_off = itemView.findViewById(R.id.btn_timer_on_off);
+            card_timer = itemView.findViewById(R.id.card_timer);
             mMainActivity = (MainActivity) itemView.getContext();
         }
     }

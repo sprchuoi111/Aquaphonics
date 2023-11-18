@@ -152,42 +152,43 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
         holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).child("status").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int status = snapshot.getValue(int.class);
-                actuator.listActuator_water().get(itemPosition).setStatus(status);
-                // set list for sensor adapter
-                // Check realtime state
-                //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
-                // change state of button
-                int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
-                int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
-                if(status == 1 ) {
-                    if(actuator.listActuator_water().get(itemPosition).getHour() == 0 && actuator.listActuator_water().get(itemPosition).getMinute() == 0 ){
+                if(snapshot.exists()) {
+                    int status = snapshot.getValue(int.class);
+                    actuator.listActuator_water().get(itemPosition).setStatus(status);
+                    // set list for sensor adapter
+                    // Check realtime state
+                    //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
+                    // change state of button
+                    int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
+                    int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
+                    if (status == 1) {
+                        if (actuator.listActuator_water().get(itemPosition).getHour() == 0 && actuator.listActuator_water().get(itemPosition).getMinute() == 0) {
+                            holder.btn_actuator.setChecked(false);
+                            act.setStatus(0);
+                            holder.img_actuator.setImageResource(finalImg_actuator_off);
+                            holder.card_actuator.setCardBackgroundColor(off_actuator);
+                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
+                            //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
+                            // save status back to actuator
+                            holder.mMainActivity.addActuatorToFireBase();
+                        } else {
+                            holder.card_actuator.setCardBackgroundColor(on_actuator);
+                            holder.btn_actuator.setChecked(true);
+                            holder.img_actuator.setImageResource(finalImg_actuator_on);
+                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
+
+                            act.setStatus(1);
+                        }
+                    }
+                    if (status == 0) {
                         holder.btn_actuator.setChecked(false);
                         act.setStatus(0);
                         holder.img_actuator.setImageResource(finalImg_actuator_off);
                         holder.card_actuator.setCardBackgroundColor(off_actuator);
                         holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
 
-                        //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                        // save status back to actuator
-                        holder.mMainActivity.addActuatorToFireBase();
                     }
-                    else {
-                        holder.card_actuator.setCardBackgroundColor(on_actuator);
-                        holder.btn_actuator.setChecked(true);
-                        holder.img_actuator.setImageResource(finalImg_actuator_on);
-                        holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
-
-                        act.setStatus(1);
-                    }
-                }
-                if(status == 0){
-                    holder.btn_actuator.setChecked(false);
-                    act.setStatus(0);
-                    holder.img_actuator.setImageResource(finalImg_actuator_off);
-                    holder.card_actuator.setCardBackgroundColor(off_actuator);
-                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
-
                 }
             }
             @Override

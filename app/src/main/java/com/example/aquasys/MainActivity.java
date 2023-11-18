@@ -4,21 +4,34 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
+import android.widget.RemoteViews;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.aquasys.network.NetworkChangeReceiver;
@@ -56,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public DatabaseReference mDatabaseActuator_water;
     public DatabaseReference mDatabaseSchedule;
 
+    public int pos_edit_actuator;
     public actuator tmp_actuator;
 
     BroadcastReceiver broadcastReceiver;
@@ -385,46 +399,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        int notificationId = 0;
 //        notificationManager.notify(notificationId, mBuilder.build());
 //    }
-//    public void Notification() {
-//        // get Layout Inflater for Notification
-//        @SuppressLint("InflateParams") View mViewNotification = MainActivity.this.getLayoutInflater().inflate(R.layout.notification_layout,null);
-//        // mapping component in notification layout
-//        TextView tv_humidity_val = mViewNotification.findViewById(R.id.tv_humidity_val);
-//        TextView tv_ph_val = mViewNotification.findViewById(R.id.tv_ph_val);
-//        TextView tv_light_val = mViewNotification.findViewById(R.id.tv_light_val);
-//        TextView tv_soil_val = mViewNotification.findViewById(R.id.tv_soil_val);
-//        TextView tv_temperature_val = mViewNotification.findViewById(R.id.tv_temperature_val);
-//        TextView tv_waterlevel = mViewNotification.findViewById(R.id.tv_waterlevel);
-//        // set value for sensor in notification
-//        tv_humidity_val.setText(sensor.listSensor().get(0).getValue());
-//        tv_temperature_val.setText(sensor.listSensor().get(1).getValue());
-//        tv_waterlevel.setText(sensor.listSensor().get(2).getValue());
-//        tv_ph_val.setText(sensor.listSensor().get(3).getValue());
-//        tv_light_val.setText(sensor.listSensor().get(4).getValue());
-//        tv_soil_val.setText(sensor.listSensor().get(5).getValue());
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        NotificationChannel notificationChannel= null;
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            notificationChannel = new NotificationChannel(CHANNEL_ID,"name", NotificationManager.IMPORTANCE_LOW);
-//        }
+//       public void Notification() {
+//           // get Layout Inflater for Notification
+//           @SuppressLint("InflateParams") View mViewNotification = MainActivity.this.getLayoutInflater().inflate(R.layout.notification_layout,null);
+//           // mapping component in notification layout
+//           TextView tv_humidity_val = mViewNotification.findViewById(R.id.tv_humidity_val);
+//           TextView tv_ph_val = mViewNotification.findViewById(R.id.tv_ph_val);
+//           TextView tv_light_val = mViewNotification.findViewById(R.id.tv_light_val);
+//           TextView tv_soil_val = mViewNotification.findViewById(R.id.tv_soil_val);
+//           TextView tv_temperature_val = mViewNotification.findViewById(R.id.tv_temperature_val);
+//           TextView tv_waterlevel = mViewNotification.findViewById(R.id.tv_waterlevel);
+//           // set value for sensor in notification
+//           tv_humidity_val.setText(sensor.listSensor().get(0).getValue());
+//           tv_temperature_val.setText(sensor.listSensor().get(1).getValue());
+//           tv_waterlevel.setText(sensor.listSensor().get(2).getValue());
+//           tv_ph_val.setText(sensor.listSensor().get(3).getValue());
+//           tv_light_val.setText(sensor.listSensor().get(4).getValue());
+//           tv_soil_val.setText(sensor.listSensor().get(5).getValue());
+//           NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//           NotificationChannel notificationChannel= null;
+//           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//               notificationChannel = new NotificationChannel(CHANNEL_ID,"name", NotificationManager.IMPORTANCE_LOW);
+//           }
 //
 //
-//        // Get the layouts to use in the custom notification
-//        RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.small_notification_layout);
-//        RemoteViews notificationLayoutExpanded = new RemoteViews(getPackageName(), R.layout.notification_layout);
+//           // Get the layouts to use in the custom notification
+//           RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.small_notification_layout);
+//           RemoteViews notificationLayoutExpanded = new RemoteViews(getPackageName(), R.layout.notification_layout);
 //
-//        // Apply the layouts to the notification.
-//        Notification customNotification = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
-//                .setSmallIcon(R.drawable.aquaphonic)
-//                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-//                .setCustomContentView(notificationLayout)
-//                .setCustomBigContentView(notificationLayoutExpanded)
-//                .build();
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            notificationManager.createNotificationChannel(notificationChannel);
-//        }
-//        notificationManager.notify(666, customNotification);
-//    }
+//           // Apply the layouts to the notification.
+//           Notification customNotification = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
+//                   .setSmallIcon(R.drawable.aquaphonic)
+//                   .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+//                   .setCustomContentView(notificationLayout)
+//                   .setCustomBigContentView(notificationLayoutExpanded)
+//                   .build();
+//           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//               notificationManager.createNotificationChannel(notificationChannel);
+//           }
+//           notificationManager.notify(666, customNotification);
+//       }
 
 
     @Override

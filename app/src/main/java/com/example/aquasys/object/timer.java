@@ -9,17 +9,35 @@ public class timer {
     int time_start_minute;
     int time_stop_hour;
     int time_stop_minute;
+    int  status;
     // Default (no-argument) constructor
     public timer() {
         // You can initialize your fields with default values here if needed
     }
 
-    public timer(actuator act, int time_start_hour, int time_start_minute, int time_stop_hour, int time_stop_minute) {
+    public timer(actuator act, int time_start_hour, int time_start_minute, int time_stop_hour, int time_stop_minute , int  status) {
         this.act = act;
         this.time_start_hour = time_start_hour;
         this.time_start_minute = time_start_minute;
         this.time_stop_hour = time_stop_hour;
         this.time_stop_minute = time_stop_minute;
+        this.status = status;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public static List<timer> getGlobalTimer() {
+        return globalTimer;
+    }
+
+    public static void setGlobalTimer(List<timer> globalTimer) {
+        timer.globalTimer = globalTimer;
     }
 
     public actuator getAct() {
