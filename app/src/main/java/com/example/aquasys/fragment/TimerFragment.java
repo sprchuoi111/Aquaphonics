@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -85,6 +86,8 @@ public class TimerFragment extends Fragment {
 
         });
         recyclerview_timer.setAdapter(timerAdapter);
+        recyclerview_timer.addItemDecoration(new DividerItemDecoration(recyclerview_timer.getContext(), DividerItemDecoration.VERTICAL));
+
         //read data from schedule firebase
         if(timer.globalTimer.isEmpty())
             ReadScheduleData();

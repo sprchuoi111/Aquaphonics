@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/active_sensor"
         android:title="@string/sensor"
-        android:icon="@drawable/sensors"/>
+        android:icon="@drawable/sensors"
+        app:cnb_iconColor="#2196F3"/>
     <item
         android:id="@+id/active_actuator"
         android:title="@string/actuator"
-        android:icon="@drawable/relay"/>
+        android:icon="@drawable/relay"
+        app:cnb_iconColor="#2196F3"/>
     <item
         android:id="@+id/active_timer"
         android:title="@string/timer"
-        android:icon="@drawable/timer" />
+        android:icon="@drawable/timer"
+        app:cnb_iconColor="#2196F3"/>
 </menu>

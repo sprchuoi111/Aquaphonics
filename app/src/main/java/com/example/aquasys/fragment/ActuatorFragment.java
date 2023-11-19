@@ -9,8 +9,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -24,23 +26,34 @@ import com.example.aquasys.adapter.ActuatorAdapter_environment;
 import com.example.aquasys.adapter.ActuatorAdapter_water;
 import com.example.aquasys.adapter.TimerActuatorAdapter;
 import com.example.aquasys.object.actuator;
+import com.example.aquasys.viewPagerAdapter;
+import com.example.aquasys.viewPagerAdapter_actuator;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActuatorFragment extends Fragment {
-    private RecyclerView recyclerview_adapter_environment; // RecyclerView for actuator for tree
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import me.ibrahimsn.lib.OnItemSelectedListener;
+import me.ibrahimsn.lib.SmoothBottomBar;
 
-    private RecyclerView recyclerview_adapter_water; // RecyclerView for actuator for fish
+public class ActuatorFragment extends Fragment {
+
     private ActuatorAdapter_environment actuatorAdapter_environment ; // adapter for the actuator
 
     private ActuatorAdapter_water actuatorAdapter_water ; // adapter for the actuator
     private MainActivity mMainActivity ;
+    private ViewPager2 mViewPager_actuator;
+
+    private SmoothBottomBar navi_menu_actuator;
 
     ExtendedFloatingActionButton btn_menu_actuator;
     FloatingActionButton btn_edit_actuator;
@@ -48,6 +61,15 @@ public class ActuatorFragment extends Fragment {
 
     // to check whether sub FABs are visible or not
     Boolean isAllFabsVisible;
+    //create variable for fragment
+
+
+
+    private static final int FRAGMENT_ACTUATOR_ENVIRONMENT = 0;
+    private static final int FRAGMENT_ACTUATOR_WATER = 1;
+
+    private int mCurrentFragment = FRAGMENT_ACTUATOR_ENVIRONMENT;
+    ;
 
     public ActuatorFragment() {
         // Required empty public constructor
@@ -72,14 +94,37 @@ public class ActuatorFragment extends Fragment {
         // Inflate layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_actuator, container, false);
         mMainActivity = (MainActivity) getContext();
-
         // Add actuator button
         btn_add_actuator = mView.findViewById(R.id.btn_add_actuator);
         btn_edit_actuator = mView.findViewById(R.id.btn_edit_actuator);
         btn_menu_actuator = mView.findViewById(R.id.btn_menu_actuator);
+
+        // View pager for actuator fragment
+        mViewPager_actuator = mView.findViewById(R.id.view_pager_actuator);
+        navi_menu_actuator = mView.findViewById(R.id.navi_menu_actuator);
+
+        setUpViewPager_adapter();
+
+        // Set up click events for the items in the BottomNavigationView.
+        navi_menu_actuator.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public boolean onItemSelect(int i) {
+                if (i == 0) {
+                    openActuatorFragment_environment();
+                    Toast.makeText(mMainActivity , "0" , Toast.LENGTH_SHORT).show();
+                } else if (i == 1) {
+                    Toast.makeText(mMainActivity , "1" , Toast.LENGTH_SHORT).show();
+                    openActuatorFragment_water();
+                }
+                return true;
+            }
+
+        });
+
+
         // Now set all the FABs and all the action name
-        // texts as GONE
-        btn_add_actuator.setVisibility(View.GONE);
+                // texts as GONE
+                btn_add_actuator.setVisibility(View.GONE);
         btn_edit_actuator.setVisibility(View.GONE);
 
         // make the boolean variable as false, as all the
@@ -128,8 +173,8 @@ public class ActuatorFragment extends Fragment {
         // Read from Firebase when the first time the app is opened
         Read_Data_fromFireBase_Actuator_Tree();
         Read_Data_fromFireBase_Actuator_Fish();
-        TextView tv_number_actuator_environment = mView.findViewById(R.id.tv_number_actuator_environment);
-        TextView tv_number_actuator_water = mView.findViewById(R.id.tv_number_actuator_water);
+
+
         // button delete actuator
         btn_edit_actuator.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,15 +231,6 @@ public class ActuatorFragment extends Fragment {
                             default:
                                 break;
                         }
-
-                        // set list for sensor adapter
-                        actuatorAdapter_environment = new ActuatorAdapter_environment(actuator.listActuator_environment(), (act, position) -> {
-                        });
-                        recyclerview_adapter_environment.setAdapter(actuatorAdapter_environment);
-                        // set list for sensor adapter
-                        actuatorAdapter_water = new ActuatorAdapter_water(actuator.listActuator_water(), (act, position) -> {
-                        });
-                        recyclerview_adapter_water.setAdapter(actuatorAdapter_water);
                         // Notify Firebase about the changes
                         mMainActivity.addActuatorToFireBase();
                     } else {
@@ -251,13 +287,6 @@ public class ActuatorFragment extends Fragment {
                             } else {
                                 actuator.globalActuator_water.add(actuator.globalActuator_add.get(0));
                             }
-
-                            int environmentActuatorSize = actuator.globalActuator_environment != null ? actuator.globalActuator_environment.size() : 0;
-                            tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
-
-                            int waterActuatorSize = actuator.globalActuator_water != null ? actuator.globalActuator_water.size() : 0;
-                            tv_number_actuator_water.setText(waterActuatorSize + " Devices");
-
                             mMainActivity.addActuatorToFireBase();
                         } else {
                             // Display a toast when the conditions are not met
@@ -273,26 +302,8 @@ public class ActuatorFragment extends Fragment {
                 dialog.show();
             }
         });
-
-        recyclerview_adapter_environment = mView.findViewById(R.id.recyclerview_adapter_environment);
-        recyclerview_adapter_water = mView.findViewById(R.id.recyclerview_adapter_water);
-
-// Setting GridLayoutManager with 2 columns for environment
-        recyclerview_adapter_environment.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
-
-// Setting GridLayoutManager with 2 columns for water
-        recyclerview_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
         // Display the number of environment actuators in the list
-
-
-        // Assuming there is a similar list for water actuators
-        int environmentActuatorSize = actuator.listActuator_environment() != null ? actuator.listActuator_environment().size() : 0;
-        tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
-
-        int waterActuatorSize = actuator.listActuator_water() != null ? actuator.listActuator_water().size() : 0;
-        tv_number_actuator_water.setText(waterActuatorSize + " Devices");
         return mView;
-
     }
 
     // read from firebase when the first time open app
@@ -314,14 +325,8 @@ public class ActuatorFragment extends Fragment {
             //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
 
             actuator.globalActuator_environment = actuatorList;
-
-            // set list for sensor adapter
-            actuatorAdapter_environment = new ActuatorAdapter_environment(actuator.listActuator_environment(), (act, position) -> {
-            });
-            recyclerview_adapter_environment.setAdapter(actuatorAdapter_environment);
             mMainActivity.addActuatorToFireBase();
         }
-
         @Override
         public void onCancelled(@NonNull DatabaseError error) {
             Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
@@ -347,11 +352,6 @@ public class ActuatorFragment extends Fragment {
                 //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
 
                 actuator.globalActuator_water = actuatorList;
-
-                // set list for sensor adapter
-                actuatorAdapter_water = new ActuatorAdapter_water(actuator.listActuator_water(), (act, position) -> {
-                });
-                recyclerview_adapter_water.setAdapter(actuatorAdapter_water);
                 mMainActivity.addActuatorToFireBase();
             }
 
@@ -363,6 +363,29 @@ public class ActuatorFragment extends Fragment {
 
 
     }
+    // Set up the ViewPager with an adapter.
+    private void setUpViewPager_adapter() {
+        viewPagerAdapter_actuator mViewPagerAdapter = new viewPagerAdapter_actuator(this);
+        mViewPager_actuator.setAdapter(mViewPagerAdapter);
+    }
 
+    //Fragment actuator environment
+    private void openActuatorFragment_environment() {
+        if (mCurrentFragment != FRAGMENT_ACTUATOR_ENVIRONMENT) {
+            mViewPager_actuator.setCurrentItem(0);
+            mCurrentFragment = FRAGMENT_ACTUATOR_ENVIRONMENT;
+            //nếu màn hình hiện tại không ở HomeFragment thì nó sẽ chuyển sang HomeFragment đồng thời lưu giá trị tương ứng vào mCurrentFragment để kiểm tra cho các lần chọn sau
+        }
+    }
+
+
+    //Fragment actuator water
+    private void openActuatorFragment_water() {
+        if (mCurrentFragment != FRAGMENT_ACTUATOR_WATER) {
+            mViewPager_actuator.setCurrentItem(1);
+            mCurrentFragment = FRAGMENT_ACTUATOR_WATER;
+            //nếu màn hình hiện tại không ở HomeFragment thì nó sẽ chuyển sang HomeFragment đồng thời lưu giá trị tương ứng vào mCurrentFragment để kiểm tra cho các lần chọn sau
+        }
+    }
 
 }

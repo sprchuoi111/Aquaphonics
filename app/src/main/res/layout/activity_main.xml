@@ -42,7 +42,8 @@
             android:background="#ECF9FF"
             app:cnb_menuResource="@menu/bottom_nav"
             app:cnb_iconSize="30dp"
-            app:itemTextColor="@color/color_item_bottom_nav"/>
+            app:itemTextColor="@color/color_item_bottom_nav"
+            />
 
     </RelativeLayout>
     <com.google.android.material.navigation.NavigationView
