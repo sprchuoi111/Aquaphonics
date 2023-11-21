@@ -24,7 +24,6 @@ import com.google.firebase.auth.FirebaseUser;
 public class Login extends AppCompatActivity {
     private TextInputEditText edt_usr_login, edt_psw_login;
     private Button btn_login;
-
     private ProgressBar login_progressbar;
     private Intent intent;
     private TextView tv_forgot_pass;

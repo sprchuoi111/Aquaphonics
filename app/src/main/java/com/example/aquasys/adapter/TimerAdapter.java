@@ -92,9 +92,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                             tim.setStatus(0);
                             holder.card_timer.setCardBackgroundColor(offTimerColor);
                         }
-
-                        // Save status back to actuator
-                        holder.mMainActivity.addScheduleToFireBase();
                     }
                 } else {
                     // Handle the case when the status data is not found
@@ -104,7 +101,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                     tim.setStatus(0);
                     int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
                     holder.card_timer.setCardBackgroundColor(offTimerColor);
-                    holder.mMainActivity.addScheduleToFireBase();
                 }
             }
 

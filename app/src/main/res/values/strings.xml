@@ -46,5 +46,6 @@
     <string name="for_environment">FOR ENVIRONMENT</string>
     <string name="for_fish">FOR FISH</string>
     <string name="description">Description</string>
-
+    <string name="channel_name">Channel 1</string>
+    <string name="channel_description">This is Channel 1</string>
 </resources>
