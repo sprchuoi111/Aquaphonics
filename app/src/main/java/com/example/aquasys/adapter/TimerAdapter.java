@@ -3,23 +3,22 @@ package com.example.aquasys.adapter;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 
-import android.content.res.ColorStateList;
-import android.media.TimedText;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
 import com.example.aquasys.listener.SelectListenerTimer;
@@ -51,9 +50,12 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
     @Override
     public void onBindViewHolder(@NonNull TimerViewHolder holder, int position) {
         timer tim = timerList.get(position);
-        //get the position of the item in timerlist
+
+// Get the position of the item in the timer list
         int currentPosition = holder.getAdapterPosition();
-        if(tim == null){
+
+// Null check for tim and holder
+        if (tim == null) {
             return;
         }
 
@@ -62,17 +64,26 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                 tim.getTime_start_hour(), tim.getTime_start_minute(),
                 tim.getTime_stop_hour(), tim.getTime_stop_minute());
         holder.tv_timer_set.setText(time);
+
+// Set image for timer using Glide (assuming you have an image resource ID)
+        Glide.with(holder.itemView.getContext())
+                .load(tim.getAct().getImg())
+                .placeholder(R.drawable.unknown) // Add a placeholder image resource
+                .into(holder.img_actuator_timer);
+
+
         //Update realtime status schedule
         holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(currentPosition)).child("status").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     int status = snapshot.getValue(Integer.class);
-
+                    int currentPosition = holder.getAdapterPosition();
                     // Verify that the tim object is not null
                     if (tim != null) {
                         int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
-                        int onTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.white);
+                        int onTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_enable);
+                        int onTextTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.black);
 
                         if (status == 1) {
                             if (timer.getGlobalTimer().get(currentPosition).getTime_stop_minute() == 0
@@ -81,16 +92,19 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                                     && timer.globalTimer.get(currentPosition).getTime_start_hour() == 0) {
                                 holder.btn_timer_on_off.setChecked(false);
                                 tim.setStatus(0);
-                                holder.card_timer.setCardBackgroundColor(offTimerColor);
+                                holder.tv_timer_set.setTextColor(offTimerColor);
+                                holder.tv_name_timer_act.setTextColor(offTimerColor);
                             } else {
                                 holder.btn_timer_on_off.setChecked(true);
                                 tim.setStatus(1);
-                                holder.card_timer.setCardBackgroundColor(onTimerColor);
+                                holder.tv_timer_set.setTextColor(onTextTimerColor);
+                                holder.tv_name_timer_act.setTextColor(onTextTimerColor);
                             }
                         } else if (status == 0) {
                             holder.btn_timer_on_off.setChecked(false);
                             tim.setStatus(0);
-                            holder.card_timer.setCardBackgroundColor(offTimerColor);
+                            holder.tv_timer_set.setTextColor(offTimerColor);
+                            holder.tv_name_timer_act.setTextColor(offTimerColor);
                         }
                     }
                 } else {
@@ -100,7 +114,8 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                     holder.btn_timer_on_off.setChecked(false);
                     tim.setStatus(0);
                     int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
-                    holder.card_timer.setCardBackgroundColor(offTimerColor);
+                    holder.card_timer.setBackgroundColor(offTimerColor);
+
                 }
             }
 
@@ -198,29 +213,31 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
 
                 // Check if the adapter position is valid
                 if (adapterPosition != RecyclerView.NO_POSITION) {
+                    int color;
+
+                    int onTextTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.black);
+
                     if (isChecked) {
                         // Change the color of the card timer
-                        int color = ContextCompat.getColor(holder.mMainActivity, R.color.white);
-                        holder.card_timer.setCardBackgroundColor(color);
-
+                        color = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_enable);
+                        holder.card_timer.setBackgroundColor(color);
+                        holder.tv_timer_set.setTextColor(onTextTimerColor);
+                        holder.tv_name_timer_act.setTextColor(onTextTimerColor);
                         // Change the status of the item in the list
                         timerList.get(adapterPosition).setStatus(1);
-                        holder.mMainActivity.addScheduleToFireBase();
                     } else {
                         // Change the color of the card timer
-                        int color = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
-                        holder.card_timer.setCardBackgroundColor(color);
-
+                        color = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
+                        //holder.card_timer.setBackgroundColor(color);
+                        holder.tv_timer_set.setTextColor(color);
+                        holder.tv_name_timer_act.setTextColor(color);
                         // Change the status of the item in the list
                         timerList.get(adapterPosition).setStatus(0);
-                        holder.mMainActivity.addScheduleToFireBase();
                     }
+                    holder.mMainActivity.addScheduleToFireBase();
                 }
             }
         });
-
-
-
 
     }
 
@@ -234,15 +251,18 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
         private final TextView tv_name_timer_act;
         private final TextView tv_timer_set;
         private final MainActivity mMainActivity;
+        @SuppressLint("UseSwitchCompatOrMaterialCode")
         private final  Switch btn_timer_on_off;
 
-        private final CardView card_timer;
+        private final ConstraintLayout card_timer;
+        private final ImageView img_actuator_timer;
         public TimerViewHolder(@NonNull View itemView) {
             super(itemView);
             tv_name_timer_act = itemView.findViewById(R.id.tv_name_timer_act);
             tv_timer_set = itemView.findViewById(R.id.tv_timer_set);
             btn_timer_on_off = itemView.findViewById(R.id.btn_timer_on_off);
             card_timer = itemView.findViewById(R.id.card_timer);
+            img_actuator_timer = itemView.findViewById(R.id.img_actuator_timer);
             mMainActivity = (MainActivity) itemView.getContext();
         }
     }
