@@ -34,7 +34,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
 
     private final List<timer> timerList;
 
-
     public TimerAdapter( List<timer> timerList,SelectListenerTimer listenerTimer) {
         this.timerList = timerList;
     }

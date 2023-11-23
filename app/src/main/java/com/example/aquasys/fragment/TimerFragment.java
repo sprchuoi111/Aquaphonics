@@ -49,16 +49,12 @@ import java.util.Objects;
 public class TimerFragment extends Fragment {
 
     private static final int NOTIFICATION_ID = 1;
-    private ToggleButton btn_bulb1,btn_bulb2,btn_pump,btn_heater;
     private NumberPicker np_duration_hour_from , np_duration_minute_from ;
     private NumberPicker np_duration_hour_to , np_duration_minute_to ;
     private MainActivity mMainActivity;
     private RecyclerView recyclerview_timer;
     private TimerAdapter timerAdapter;
     private  String selectedActuatorName;
-
-    private TimerFragment timerFragment;
-
 
     public TimerFragment() {
     }

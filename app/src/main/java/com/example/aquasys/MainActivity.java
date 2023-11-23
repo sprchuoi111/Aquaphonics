@@ -50,31 +50,21 @@ import com.google.firebase.database.ValueEventListener;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
-    //create variable for fragment
-
-
-
     private static final int FRAGMENT_SENSOR = 0;
     private static final int FRAGMENT_ACTUATOR = 1;
     private static final int FRAGMENT_TIMER = 2;
     private static final String CHANNEL_ID = "notify";
-    // create for current fragment
     private int mCurrentFragment = FRAGMENT_SENSOR;
-
     private ChipNavigationBar bottom_navi;
     private ViewPager2 mViewPager; // Declare a ViewPager2 variable.
-
     private DrawerLayout drawer_layout; // Declare a DrawerLayout variable.
     public DatabaseReference mDatabaseSensor_environment;
     public DatabaseReference mDatabaseSensor_water;
     public DatabaseReference mDatabaseActuator_environment;
     public DatabaseReference mDatabaseActuator_water;
     public DatabaseReference mDatabaseSchedule;
-
     public int pos_edit_actuator;
     public actuator tmp_actuator;
-
     BroadcastReceiver broadcastReceiver;
 
     @Override
@@ -262,6 +252,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
             Toast.makeText(MainActivity.this, "Logout success", Toast.LENGTH_SHORT).show();
             finish();
+        }else if (id == R.id.change_password) {
+            Intent intent = new Intent(getApplicationContext(), ChangePassword.class);
+            startActivity(intent);
         }
 
         drawer_layout.closeDrawer(GravityCompat.START); // Close the navigation drawer.
@@ -323,15 +316,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return cm.getActiveNetworkInfo() != null;
     }
 
-    // check internet ping to gg
-    public boolean InternetIsConnected() {
-        try {
-            String command = "ping -c 1 google.com";
-            return (Runtime.getRuntime().exec(command).waitFor() == 0);
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     // save sensor to firebase
 
@@ -397,80 +381,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
     }
-
-    // notification builder
-//    private void Notification() {
-//            // Create an explicit intent for an Activity in your app
-//            Intent intent = new Intent(this, MainActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-//
-//            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, String.valueOf(CHANNEL_ID))
-//                    .setSmallIcon(R.drawable.aquaphonic)
-//                    .setContentTitle("My notification")
-//                    .setContentText("Hello World!")
-//                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-//                // Set the intent that will fire when the user taps the notification
-//                .setContentIntent(pendingIntent)
-//                .setAutoCancel(true);
-//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-//
-//        // notificationId is a unique int for each notification that you must define
-//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-//            // TODO: Consider calling
-//            //    ActivityCompat#requestPermissions
-//            // here to request the missing permissions, and then overriding
-//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//            //                                          int[] grantResults)
-//            // to handle the case where the user grants the permission. See the documentation
-//            // for ActivityCompat#requestPermissions for more details.
-//            return;
-//        }
-//        int notificationId = 0;
-//        notificationManager.notify(notificationId, mBuilder.build());
-//    }
-//       public void Notification() {
-//           // get Layout Inflater for Notification
-//           @SuppressLint("InflateParams") View mViewNotification = MainActivity.this.getLayoutInflater().inflate(R.layout.notification_layout,null);
-//           // mapping component in notification layout
-//           TextView tv_humidity_val = mViewNotification.findViewById(R.id.tv_humidity_val);
-//           TextView tv_ph_val = mViewNotification.findViewById(R.id.tv_ph_val);
-//           TextView tv_light_val = mViewNotification.findViewById(R.id.tv_light_val);
-//           TextView tv_soil_val = mViewNotification.findViewById(R.id.tv_soil_val);
-//           TextView tv_temperature_val = mViewNotification.findViewById(R.id.tv_temperature_val);
-//           TextView tv_waterlevel = mViewNotification.findViewById(R.id.tv_waterlevel);
-//           // set value for sensor in notification
-//           tv_humidity_val.setText(sensor.listSensor().get(0).getValue());
-//           tv_temperature_val.setText(sensor.listSensor().get(1).getValue());
-//           tv_waterlevel.setText(sensor.listSensor().get(2).getValue());
-//           tv_ph_val.setText(sensor.listSensor().get(3).getValue());
-//           tv_light_val.setText(sensor.listSensor().get(4).getValue());
-//           tv_soil_val.setText(sensor.listSensor().get(5).getValue());
-//           NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//           NotificationChannel notificationChannel= null;
-//           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//               notificationChannel = new NotificationChannel(CHANNEL_ID,"name", NotificationManager.IMPORTANCE_LOW);
-//           }
-//
-//
-//           // Get the layouts to use in the custom notification
-//           RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.small_notification_layout);
-//           RemoteViews notificationLayoutExpanded = new RemoteViews(getPackageName(), R.layout.notification_layout);
-//
-//           // Apply the layouts to the notification.
-//           Notification customNotification = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
-//                   .setSmallIcon(R.drawable.aquaphonic)
-//                   .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-//                   .setCustomContentView(notificationLayout)
-//                   .setCustomBigContentView(notificationLayoutExpanded)
-//                   .build();
-//           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//               notificationManager.createNotificationChannel(notificationChannel);
-//           }
-//           notificationManager.notify(666, customNotification);
-//       }
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
