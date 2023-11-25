@@ -28,6 +28,8 @@ public class sensor {
         ph ,
         level_water
     }
+    //no-argument constructor
+    public sensor(){}
 
     public sensor(String name,String value, int img , typeofsensor type) {
         this.name = name;
@@ -68,9 +70,9 @@ public class sensor {
         this.status = status;
     }
     // sensor list for fish
-    private static final List<sensor> globalSensor_enviroment = new ArrayList<>();
+    public static  List<sensor> globalSensor_enviroment = new ArrayList<>();
     // sensor list for tree
-    private static final List<sensor> globalSensor_water = new ArrayList<>();
+    public static  List<sensor> globalSensor_water = new ArrayList<>();
 
 
     // sensor list for aqua

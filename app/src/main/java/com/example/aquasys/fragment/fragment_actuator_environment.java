@@ -56,7 +56,7 @@ public class fragment_actuator_environment extends Fragment {
         return mView;
     }
     // Read data of actuator tree
-    private void Read_Data_fromFireBase_Actuator_Tree(){
+    public void Read_Data_fromFireBase_Actuator_Tree(){
         mMainActivity.mDatabaseActuator_environment.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

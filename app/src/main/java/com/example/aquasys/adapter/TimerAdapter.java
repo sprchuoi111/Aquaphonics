@@ -34,7 +34,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
 
     private final List<timer> timerList;
 
-
     public TimerAdapter( List<timer> timerList,SelectListenerTimer listenerTimer) {
         this.timerList = timerList;
     }
@@ -72,8 +71,61 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                 .into(holder.img_actuator_timer);
 
 
+
+
+
+        holder.card_timer.setOnLongClickListener(v -> {
+            // Get adapter position of ViewHolder in RecyclerView and assign it to 'currentPosition'.
+            int itemPosition = holder.getAdapterPosition();
+
+            // Create a builder for an alert dialog that uses the default alert dialog theme.
+            new AlertDialog.Builder(v.getContext())
+                    .setTitle("Delete Schedule") // Set title text for dialog.
+                    .setMessage("Are you sure you want to delete this Schedule?") // Set message text for dialog.
+                    // Add positive button to dialog with text "OK" and click listener.
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        // If 'currentPosition' is a valid position
+                        if (itemPosition != RecyclerView.NO_POSITION) {
+                            // Get the timer object to be removed from Firebase
+                            timer timerToRemove = timer.globalTimer.get(itemPosition);
+                            // Remove the item at 'itemPosition' from timerList.
+                            timerList.remove(itemPosition);
+                            notifyDataSetChanged();
+                            // Remove the timer with the current position in Firebase
+                            if (timerToRemove != null) {
+                                holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(itemPosition)).removeValue()
+                                        .addOnSuccessListener(aVoid -> {
+                                          // Data has been removed successfully from Firebase
+                                            // Update the positions in Firebase for the remaining items
+                                            for (int i = itemPosition; i < timerList.size(); i++) {
+                                                timer timerToUpdate = timerList.get(i);
+                                                if (timerToUpdate != null) {
+                                                    holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(i)).setValue(timerToUpdate);
+                                                }
+                                            }
+                                            if(itemPosition != timerList.size())
+                                                holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(timerList.size())).removeValue();
+
+                                            Toast.makeText(holder.mMainActivity, "Schedule deleted", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            // Handle any errors
+                                            Toast.makeText(holder.mMainActivity, "Error deleting schedule", Toast.LENGTH_SHORT).show();
+                                        });
+                            }
+                        }
+                    })
+                    // Add negative button to dialog with text "Cancel" and null click listener.
+                    .setNegativeButton(android.R.string.cancel, null)
+                    // Set icon for dialog using a drawable resource.
+                    .setIcon(android.R.drawable.ic_menu_delete)
+                    // Show this dialog, adding it to the screen.
+                    .show();
+            return true;
+        });
+
         //Update realtime status schedule
-        holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(currentPosition)).child("status").addValueEventListener(new ValueEventListener() {
+        holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(holder.getAdapterPosition())).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -126,33 +178,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
         });
 
 
-        holder.card_timer.setOnLongClickListener(v -> {
-            // Get adapter position of ViewHolder in RecyclerView and assign it to 'currentPosition'.;
-
-            // Create a builder for an alert dialog that uses default alert dialog theme.
-            // This method is called when positive button is clicked.
-            new AlertDialog.Builder(v.getContext())
-                    .setTitle("Delete Schedule") // Set title text for dialog.
-                    .setMessage("Are you sure you want to delete this Schedule?") // Set message text for dialog.
-                    // Add positive button to dialog with text "OK" and click listener.
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        //If 'currentPosition' is a valid position
-                        int itemPosition = holder.getAdapterPosition();
-                        if (itemPosition != RecyclerView.NO_POSITION) {
-                            // Remove the room at 'currentPosition' from mListRoom.
-                            timerList.remove(itemPosition);
-                            notifyDataSetChanged();
-                            holder.mMainActivity.addScheduleToFireBase();
-                        }
-                    })
-                    // Add negative button to dialog with text "Cancel" and null click listener.
-                    .setNegativeButton(android.R.string.cancel, null)
-                    // Set icon for dialog using a drawable resource.
-                    .setIcon(android.R.drawable.ic_menu_delete)
-                    // Show this dialog, adding it to the screen.
-                    .show();
-            return true;
-        });
         holder.card_timer.setOnClickListener(v -> {
             // get current position
             AlertDialog.Builder builder = new AlertDialog.Builder(holder.mMainActivity);
@@ -192,7 +217,8 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                     timerList.get(currentPosition).setTime_stop_hour(hourTo);
                     timerList.get(currentPosition).setTime_stop_minute(minuteTo);
                     notifyDataSetChanged();
-                    holder.mMainActivity.addScheduleToFireBase();
+                    //push timer to firebase after change the setting time of timer
+                    holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(currentPosition)).setValue(timerList.get(currentPosition));
                 } else {
                     // Display a toast when the conditions are not met
                     Toast.makeText(holder.mMainActivity, "Please choose again!!", Toast.LENGTH_SHORT).show();
@@ -234,7 +260,9 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                         // Change the status of the item in the list
                         timerList.get(adapterPosition).setStatus(0);
                     }
-                    holder.mMainActivity.addScheduleToFireBase();
+                    //set value for turn on of button
+                    holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(currentPosition)).child("status").setValue(timerList.get(adapterPosition).getStatus());
+
                 }
             }
         });

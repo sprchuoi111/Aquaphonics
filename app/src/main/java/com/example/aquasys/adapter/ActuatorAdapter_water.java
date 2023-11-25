@@ -103,7 +103,13 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                     Toast.makeText(holder.mMainActivity, act.getName() + String.format(",Duration : %02d:%02d ", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
                     holder.img_actuator.setImageResource(finalImg_actuator_on);
                     //save actuator to firebase
-                    holder.mMainActivity.addActuatorToFireBase();
+                    holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).setValue(actuatorList.get(itemPosition)).addOnSuccessListener(aVoid -> {
+                                // Data has been saved successfully
+                            })
+                            .addOnFailureListener(e -> {
+                                // Handle any errors
+                                Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
+                            });;
                     holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
 
 
@@ -141,7 +147,14 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                 act.setHour(np_duration_hour.getValue());
                 act.setMinute(np_duration_minute.getValue());
                 //save actuator to firebase
-                holder.mMainActivity.addActuatorToFireBase();
+                //save actuator to firebase
+                holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).setValue(actuatorList.get(itemPosition)).addOnSuccessListener(aVoid -> {
+                            // Data has been saved successfully
+                        })
+                        .addOnFailureListener(e -> {
+                            // Handle any errors
+                            Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
+                        });
             });
             builder.setNegativeButton("Cancel", (dialog, which) -> holder.btn_actuator.setChecked(false));
             AlertDialog dialog = builder.create();
@@ -170,8 +183,6 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                             holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
 
                             //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                            // save status back to actuator
-                            holder.mMainActivity.addActuatorToFireBase();
                         } else {
                             holder.card_actuator.setCardBackgroundColor(on_actuator);
                             holder.btn_actuator.setChecked(true);
@@ -215,7 +226,18 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                                 // Remove the room at 'currentPosition' from mListRoom.
                                 actuatorList.remove(itemPosition);
                                 notifyDataSetChanged();
-                                holder.mMainActivity.addActuatorToFireBase();
+                                // delete value of actuator in adapter position
+                                holder.mMainActivity.mDatabaseActuator_water.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).removeValue();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
                             }
                             else {Toast.makeText(holder.mMainActivity, "Can not remove this Actuator", Toast.LENGTH_SHORT).show();}
 

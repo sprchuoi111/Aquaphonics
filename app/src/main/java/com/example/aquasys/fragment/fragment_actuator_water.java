@@ -52,7 +52,7 @@ public class fragment_actuator_water extends Fragment {
         return mView;
     }
 
-    private void Read_Data_fromFireBase_Actuator_Fish() {
+    public void Read_Data_fromFireBase_Actuator_Fish() {
         mMainActivity.mDatabaseActuator_water.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

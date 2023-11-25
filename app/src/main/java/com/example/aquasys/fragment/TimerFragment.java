@@ -49,16 +49,12 @@ import java.util.Objects;
 public class TimerFragment extends Fragment {
 
     private static final int NOTIFICATION_ID = 1;
-    private ToggleButton btn_bulb1,btn_bulb2,btn_pump,btn_heater;
     private NumberPicker np_duration_hour_from , np_duration_minute_from ;
     private NumberPicker np_duration_hour_to , np_duration_minute_to ;
     private MainActivity mMainActivity;
     private RecyclerView recyclerview_timer;
     private TimerAdapter timerAdapter;
     private  String selectedActuatorName;
-
-    private TimerFragment timerFragment;
-
 
     public TimerFragment() {
     }
@@ -213,33 +209,35 @@ public class TimerFragment extends Fragment {
         });
 
     }
-    // Read Scheduler data from firebase
-    private void ReadScheduleData() {
-        mMainActivity.mDatabaseSchedule.addListenerForSingleValueEvent(new ValueEventListener() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
-                    timer schedule  = dataSnapshot.getValue(timer.class);
-                    timer.globalTimer.add(schedule);
-                    Toast.makeText(mMainActivity, "Reading success" , Toast.LENGTH_SHORT).show();
-                    }
-                timerAdapter.notifyDataSetChanged();
-            }
-                // set list for sensor adapter
-//                timerAdapter = new TimerAdapter(timer.globalTimer, new SelectListenerTimer() {
-//                    @Override
-//                    public void onClickItemTimer(timer tim, int position) {
-//
-//                    }
-//                });
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(mMainActivity, "Error occurred while reading" , Toast.LENGTH_SHORT).show();
-            }
-        });
+    public boolean is_Read = false;
 
+    // Read Scheduler data from firebase only once
+    private void ReadScheduleData() {
+        if (!is_Read) {
+            mMainActivity.mDatabaseSchedule.addListenerForSingleValueEvent(new ValueEventListener() {
+                @SuppressLint("NotifyDataSetChanged")
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        timer schedule = dataSnapshot.getValue(timer.class);
+                        timer.globalTimer.add(schedule);
+                        Toast.makeText(mMainActivity, "Reading success", Toast.LENGTH_SHORT).show();
+                    }
+                    // Notify the adapter that the data set has changed
+                    timerAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(mMainActivity, "Error occurred while reading", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Set the flag to true after reading data
+            is_Read = true;
+        }
     }
+
     public void sendNotification(String title, String content, String time) {
         // Get the layouts to use in the custom notification
         RemoteViews notificationLayout = new RemoteViews(requireContext().getPackageName(),

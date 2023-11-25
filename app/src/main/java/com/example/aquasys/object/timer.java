@@ -82,4 +82,6 @@ public class timer {
 
     // global timer schedule for automation active activate
     public static List<timer> globalTimer = new ArrayList<>();
+
+    public boolean is_update = false;
 }

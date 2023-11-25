@@ -24,6 +24,8 @@ public class LoadingPage extends AppCompatActivity  {
 
         // create loading page
         handler = new Handler();
+
+
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
