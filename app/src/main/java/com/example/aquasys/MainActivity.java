@@ -191,26 +191,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String uid = currentUser.getUid();
 
             // Check the user's login state in the database
-            usersRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.exists()){
-                        // User is already logged in on another device
-                        // Log out from the original device
-                        auth.signOut();
-                    }
-                    else {
-                        // Mark the user as logged in on the new device
-                        usersRef.child(uid).setValue(true);
-                        // Proceed with the login on the new device
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
+//            usersRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                    if(snapshot.exists()){
+//                        // User is already logged in on another device
+//                        // Log out from the original device
+//                        auth.signOut();
+//                    }
+//                    else {
+//                        // Mark the user as logged in on the new device
+//                        usersRef.child(uid).setValue(true);
+//                        // Proceed with the login on the new device
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError error) {
+//
+//                }
+//            });
         }
         // get user
         //Firebase
@@ -255,6 +255,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else if (id == R.id.change_password) {
             Intent intent = new Intent(getApplicationContext(), ChangePassword.class);
             startActivity(intent);
+            Toast.makeText(MainActivity.this, "Return MainActivity", Toast.LENGTH_SHORT).show();
         }
 
         drawer_layout.closeDrawer(GravityCompat.START); // Close the navigation drawer.
