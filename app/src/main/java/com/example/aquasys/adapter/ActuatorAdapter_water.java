@@ -90,39 +90,199 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
             if(isChecked) {
                 if(act.getHour() == 0 && act.getMinute() == 0 ){
                     holder.btn_actuator.setChecked(false);
-                    act.setStatus(0);
-                    Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                    holder.card_actuator.setCardBackgroundColor(off_actuator);
-                    holder.img_actuator.setImageResource(finalImg_actuator_off);
-                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+                  act.setStatus(0);
+                  Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
+                  holder.card_actuator.setCardBackgroundColor(off_actuator);
+                  holder.img_actuator.setImageResource(finalImg_actuator_off);
+                  holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
 
                 }
                 else {
                     holder.card_actuator.setCardBackgroundColor(on_actuator);
-                    act.setStatus(1);
-                    Toast.makeText(holder.mMainActivity, act.getName() + String.format(",Duration : %02d:%02d ", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
+                  act.setStatus(1);
+                  Toast.makeText(holder.mMainActivity, act.getName() + String.format(",Duration : %02d:%02d ", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
                     holder.img_actuator.setImageResource(finalImg_actuator_on);
-                    //save actuator to firebase
-                    holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).setValue(actuatorList.get(itemPosition)).addOnSuccessListener(aVoid -> {
-                                // Data has been saved successfully
-                            })
-                            .addOnFailureListener(e -> {
-                                // Handle any errors
-                                Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
-                            });;
+                  //save actuator to firebase
+
                     holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
-
-
-                }
-            }
-            else {
+              }
+          }
+          else {
                 holder.card_actuator.setCardBackgroundColor(off_actuator);
-                act.setStatus(0);
+              act.setStatus(0);
                 holder.img_actuator.setImageResource(finalImg_actuator_off);
                 holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
 
-                //save actuator to firebase
-                holder.mMainActivity.addActuatorToFireBase();
+            }
+            //save status actuator to firebase
+            holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).child("status").setValue(actuatorList.get(itemPosition).getStatus()).addOnSuccessListener(aVoid -> {
+                        // Data has been saved successfully
+                    })
+                    .addOnFailureListener(e -> {
+                        // Handle any errors
+                        Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
+                    });;
+                    actuatorList.get(itemPosition).setFlag(true);
+        });
+
+            // update realtime actuator for fish in firebase
+            holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(holder.getAdapterPosition())).child("status").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        int status = snapshot.getValue(int.class);
+                        actuator.listActuator_water().get(itemPosition).setStatus(status);
+                        // set list for sensor adapter
+                        // Check realtime state
+                        //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
+                        // change state of button
+                        int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
+                        int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
+                        if(!actuatorList.get(itemPosition).getFlag()) {
+                            if (status == 1) {
+                                if (actuator.listActuator_water().get(itemPosition).getHour() == 0 && actuator.listActuator_water().get(itemPosition).getMinute() == 0) {
+                                    holder.btn_actuator.setChecked(false);
+                                    act.setStatus(0);
+                                    holder.img_actuator.setImageResource(finalImg_actuator_off);
+                                    holder.card_actuator.setCardBackgroundColor(off_actuator);
+                                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
+                                    //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
+                                } else {
+                                    holder.card_actuator.setCardBackgroundColor(on_actuator);
+                                    holder.btn_actuator.setChecked(true);
+                                    holder.img_actuator.setImageResource(finalImg_actuator_on);
+                                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
+
+                                    act.setStatus(1);
+                                }
+                            }
+                            if (status == 0) {
+                                holder.btn_actuator.setChecked(false);
+                                act.setStatus(0);
+                                holder.img_actuator.setImageResource(finalImg_actuator_off);
+                                holder.card_actuator.setCardBackgroundColor(off_actuator);
+                                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+                            }
+                        }
+
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
+                }
+            });
+        // update realtime actuator for fish in firebase
+        holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(holder.getAdapterPosition())).child("status").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    int status = snapshot.getValue(int.class);
+                    actuator.listActuator_water().get(itemPosition).setStatus(status);
+                    // set list for sensor adapter
+                    // Check realtime state
+                    //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
+                    // change state of button
+                    int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
+                    int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
+                    if(!actuatorList.get(itemPosition).getFlag()) {
+                        if (status == 1) {
+                            if (actuator.listActuator_water().get(itemPosition).getHour() == 0 && actuator.listActuator_water().get(itemPosition).getMinute() == 0) {
+                                holder.btn_actuator.setChecked(false);
+                                act.setStatus(0);
+                                holder.img_actuator.setImageResource(finalImg_actuator_off);
+                                holder.card_actuator.setCardBackgroundColor(off_actuator);
+                                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
+                                //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
+                            } else {
+                                holder.card_actuator.setCardBackgroundColor(on_actuator);
+                                holder.btn_actuator.setChecked(true);
+                                holder.img_actuator.setImageResource(finalImg_actuator_on);
+                                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
+
+                                act.setStatus(1);
+                            }
+                        }
+                        if (status == 0) {
+                            holder.btn_actuator.setChecked(false);
+                            act.setStatus(0);
+                            holder.img_actuator.setImageResource(finalImg_actuator_off);
+                            holder.card_actuator.setCardBackgroundColor(off_actuator);
+                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+                        }
+                    }
+
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
+            }
+        });
+        // update realtime actuator for fish in firebase
+        holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(holder.getAdapterPosition())).child("name").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String name = snapshot.getValue(String.class);
+                    actuator.listActuator_water().get(itemPosition).setName(name);
+                    holder.tv_name_actuator.setText(name);
+                    // set list for sensor adapter
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
+            }
+        });
+        // Remove Actuator
+        holder.card_actuator.setOnLongClickListener(new View.OnLongClickListener() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public boolean onLongClick(View v) {
+                // This method is called when positive button is clicked.
+                new AlertDialog.Builder(v.getContext())
+                        .setTitle("Delete Actuator") // Set title text for dialog.
+                        .setMessage("Are you sure you want to delete this Schedule?") // Set message text for dialog.
+                        // Add positive button to dialog with text "OK" and click listener.
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            //If 'currentPosition' is a valid position
+                            int itemPosition = holder.getAdapterPosition();
+                            if (itemPosition > 2) {
+
+                                // delete value of actuator in adapter position
+                                // Get the timer object to be removed from Firebase
+                                actuator actuatorToRemove = actuator.globalActuator_environment.get(itemPosition);
+                                // Remove the room at 'currentPosition' from mListRoom.
+                                actuatorList.remove(itemPosition);
+                                notifyDataSetChanged();
+                                // delete value of actuator in adapter position
+                                if(actuatorToRemove!=null) {
+                                    //delete the position of the actuator want to remove
+                                    holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).removeValue();
+                                    // update all of the actuator in firebase
+                                    for(int i  = itemPosition ; i < actuatorList.size() ; i++){
+                                        // save back to the firebase
+                                        holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(i)).setValue(actuatorList.get(i));
+
+                                    }
+                                    if(itemPosition != actuatorList.size())
+                                        //remove the last item in firebase
+                                        holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(actuatorList.size())).removeValue();
+                                }
+                            }
+                            else {Toast.makeText(holder.mMainActivity, "Can not remove this Actuator", Toast.LENGTH_SHORT).show();}
+
+                            })
+                        // Add negative button to dialog with text "Cancel" and null click listener.
+                        .setNegativeButton(android.R.string.cancel, null)
+                        // Set icon for dialog using a drawable resource.
+                        .setIcon(android.R.drawable.ic_menu_delete)
+                        // Show this dialog, adding it to the screen.
+                        .show();
+                return true;
             }
         });
         holder.btn_set_duration.setOnClickListener(v -> {
@@ -159,97 +319,6 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
             builder.setNegativeButton("Cancel", (dialog, which) -> holder.btn_actuator.setChecked(false));
             AlertDialog dialog = builder.create();
             dialog.show();
-        });
-
-        // update realtime actuator for fish in firebase
-        holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).child("status").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()) {
-                    int status = snapshot.getValue(int.class);
-                    actuator.listActuator_water().get(itemPosition).setStatus(status);
-                    // set list for sensor adapter
-                    // Check realtime state
-                    //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
-                    // change state of button
-                    int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
-                    int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
-                    if (status == 1) {
-                        if (actuator.listActuator_water().get(itemPosition).getHour() == 0 && actuator.listActuator_water().get(itemPosition).getMinute() == 0) {
-                            holder.btn_actuator.setChecked(false);
-                            act.setStatus(0);
-                            holder.img_actuator.setImageResource(finalImg_actuator_off);
-                            holder.card_actuator.setCardBackgroundColor(off_actuator);
-                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
-
-                            //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                        } else {
-                            holder.card_actuator.setCardBackgroundColor(on_actuator);
-                            holder.btn_actuator.setChecked(true);
-                            holder.img_actuator.setImageResource(finalImg_actuator_on);
-                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
-
-                            act.setStatus(1);
-                        }
-                    }
-                    if (status == 0) {
-                        holder.btn_actuator.setChecked(false);
-                        act.setStatus(0);
-                        holder.img_actuator.setImageResource(finalImg_actuator_off);
-                        holder.card_actuator.setCardBackgroundColor(off_actuator);
-                        holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
-
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(holder.mMainActivity, "Error when read data" , Toast.LENGTH_SHORT).show();
-            }
-
-        });
-
-        // Remove Actuator
-        holder.card_actuator.setOnLongClickListener(new View.OnLongClickListener() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public boolean onLongClick(View v) {
-                // This method is called when positive button is clicked.
-                new AlertDialog.Builder(v.getContext())
-                        .setTitle("Delete Actuator") // Set title text for dialog.
-                        .setMessage("Are you sure you want to delete this Schedule?") // Set message text for dialog.
-                        // Add positive button to dialog with text "OK" and click listener.
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            //If 'currentPosition' is a valid position
-                            int itemPosition = holder.getAdapterPosition();
-                            if (itemPosition > 2) {
-                                // Remove the room at 'currentPosition' from mListRoom.
-                                actuatorList.remove(itemPosition);
-                                notifyDataSetChanged();
-                                // delete value of actuator in adapter position
-                                holder.mMainActivity.mDatabaseActuator_water.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).removeValue();
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                            }
-                            else {Toast.makeText(holder.mMainActivity, "Can not remove this Actuator", Toast.LENGTH_SHORT).show();}
-
-                            })
-                        // Add negative button to dialog with text "Cancel" and null click listener.
-                        .setNegativeButton(android.R.string.cancel, null)
-                        // Set icon for dialog using a drawable resource.
-                        .setIcon(android.R.drawable.ic_menu_delete)
-                        // Show this dialog, adding it to the screen.
-                        .show();
-                return true;
-            }
         });
 
     }

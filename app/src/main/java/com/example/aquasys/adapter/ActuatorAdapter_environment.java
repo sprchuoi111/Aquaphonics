@@ -25,6 +25,7 @@ import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
 import com.example.aquasys.listener.SelectListenerActuator;
 import com.example.aquasys.object.actuator;
+import com.example.aquasys.object.timer;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -85,44 +86,97 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
         holder.btn_actuator.setOnCheckedChangeListener((buttonView, isChecked) -> {
             int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
             int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
-            if(isChecked) {
-                if(act.getHour() == 0 && act.getMinute() == 0 ){
-                    holder.btn_actuator.setChecked(false);
-                    act.setStatus(0);
-                    holder.img_actuator.clearColorFilter();
-
-                    Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                    holder.card_actuator.setCardBackgroundColor(off_actuator);
-                    holder.img_actuator.setImageResource(finalImg_actuator_off);
-                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
-
-                }
-                else {
-                    holder.card_actuator.setCardBackgroundColor(on_actuator);
-                    act.setStatus(1);
-                    // change img actuator color
-                    holder.img_actuator.setImageResource(finalImg_actuator_on);
-                    // change tv actuator color
-                    holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
-                    Toast.makeText(holder.mMainActivity, act.getName() + String.format(",Duration : %02d:%02d ", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
-                    //save actuator to firebase
-                    holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).setValue(actuatorList.get(itemPosition)).addOnSuccessListener(aVoid -> {
-                                // Data has been saved successfully
-                            })
-                            .addOnFailureListener(e -> {
-                                // Handle any errors
-                                Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
-                            });;
-                }
-            }
-            else {
-                holder.card_actuator.setCardBackgroundColor(off_actuator);
+            if (isChecked) {
+                if (act.getHour() == 0 && act.getMinute() == 0) {
+                holder.btn_actuator.setChecked(false);
                 act.setStatus(0);
-                //update img icon adapter off
+                holder.img_actuator.clearColorFilter();
+                Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
+                holder.card_actuator.setCardBackgroundColor(off_actuator);
                 holder.img_actuator.setImageResource(finalImg_actuator_off);
+                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
+                } else {
+                holder.card_actuator.setCardBackgroundColor(on_actuator);
+                act.setStatus(1);
+                // change img actuator color
+                holder.img_actuator.setImageResource(finalImg_actuator_on);
+                // change tv actuator color
                 holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
+                Toast.makeText(holder.mMainActivity, act.getName() + String.format(",Duration : %02d:%02d ", act.getHour(), act.getMinute()), Toast.LENGTH_SHORT).show();
+
+
+                }
+            } else {
+            holder.card_actuator.setCardBackgroundColor(off_actuator);
+            act.setStatus(0);
+                //update img icon adapter off
+            holder.img_actuator.setImageResource(finalImg_actuator_off);
+            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
             }
+            //save actuator to firebase
+            holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(holder.getAdapterPosition())).child("status").setValue(actuatorList.get(itemPosition).getStatus()).addOnSuccessListener(aVoid -> {
+                        // Data has been saved successfully
+                    })
+                    .addOnFailureListener(e -> {
+                        // Handle any errors
+                        Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
+                    });
+            actuatorList.get(itemPosition).setFlag(true);
         });
+
+        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(holder.getAdapterPosition())).child("status").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    int status = snapshot.getValue(int.class);
+                    actuator.listActuator_environment().get(itemPosition).setStatus(status);
+                    // set list for sensor adapter
+                    // Check realtime state
+                    //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
+                    // change state of button
+                    int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
+                    int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
+                    if(!actuatorList.get(itemPosition).getFlag()) {
+                        if (status == 1) {
+                            if (actuator.listActuator_environment().get(itemPosition).getHour() == 0 && actuator.listActuator_environment().get(itemPosition).getMinute() == 0) {
+                                holder.btn_actuator.setChecked(false);
+                                act.setStatus(0);
+                                holder.img_actuator.setImageResource(finalImg_actuator_off);
+                                holder.card_actuator.setCardBackgroundColor(off_actuator);
+                                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
+                                //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
+                            } else {
+                                holder.card_actuator.setCardBackgroundColor(on_actuator);
+                                holder.btn_actuator.setChecked(true);
+                                holder.img_actuator.setImageResource(finalImg_actuator_on);
+                                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
+                                act.setStatus(1);
+                            }
+                        }
+                        if (status == 0) {
+                            holder.btn_actuator.setChecked(false);
+                            act.setStatus(0);
+                            holder.img_actuator.setImageResource(finalImg_actuator_off);
+                            holder.card_actuator.setCardBackgroundColor(off_actuator);
+                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+                        }
+                    }
+                    else {
+                        Toast.makeText(holder.mMainActivity, "button check ", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
         holder.btn_set_duration.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(holder.mMainActivity);
             View diaLogView = holder.mMainActivity.getLayoutInflater().inflate(R.layout.dialog_set_duration_actuator, null);
@@ -157,53 +211,22 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
             AlertDialog dialog = builder.create();
             dialog.show();
         });
-        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("status").addValueEventListener(new ValueEventListener() {
+
+        // update realtime actuator for tree in firebase
+        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(holder.getAdapterPosition())).child("name").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    int status = snapshot.getValue(int.class);
-                    actuator.listActuator_environment().get(itemPosition).setStatus(status);
+                if (snapshot.exists()) {
+                    String name = snapshot.getValue(String.class);
+                    actuator.listActuator_water().get(itemPosition).setName(name);
+                    holder.tv_name_actuator.setText(name);
                     // set list for sensor adapter
-                    // Check realtime state
-                    //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
-                    // change state of button
-                    int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
-                    int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
-                    if(status == 1 ) {
-                        if(actuator.listActuator_environment().get(itemPosition).getHour() == 0 && actuator.listActuator_environment().get(itemPosition).getMinute() == 0 ){
-                            holder.btn_actuator.setChecked(false);
-                            act.setStatus(0);
-                            holder.img_actuator.setImageResource(finalImg_actuator_off);
-                            holder.card_actuator.setCardBackgroundColor(off_actuator);
-                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
-
-                            //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            holder.card_actuator.setCardBackgroundColor(on_actuator);
-                            holder.btn_actuator.setChecked(true);
-                            holder.img_actuator.setImageResource(finalImg_actuator_on);
-                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
-
-                            act.setStatus(1);
-                        }
-                    }
-
-                    if(status == 0){
-                        holder.btn_actuator.setChecked(false);
-                        act.setStatus(0);
-                        holder.img_actuator.setImageResource(finalImg_actuator_off);
-                        holder.card_actuator.setCardBackgroundColor(off_actuator);
-                        holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
-
-                    }
                 }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(holder.mMainActivity, "Error when read data" , Toast.LENGTH_SHORT).show();
+                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
             }
-
         });
         // Remove Actuator
         holder.card_actuator.setOnLongClickListener(new View.OnLongClickListener() {
@@ -218,22 +241,25 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                             //If 'currentPosition' is a valid position
                             int itemPosition = holder.getAdapterPosition();
-                            if (itemPosition > 3) {
+                            if (itemPosition > 1) {
                                 // Remove the room at 'currentPosition' from mListRoom.
+
+                                // get the actuator delete
+                                // Get the timer object to be removed from Firebase
+                                actuator actuatorToRemove = actuator.globalActuator_environment.get(itemPosition);
                                 actuatorList.remove(itemPosition);
                                 notifyDataSetChanged();
                                 // delete value of actuator in adapter position
-                                holder.mMainActivity.mDatabaseSensor_environment.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).removeValue();
+                                if(actuatorToRemove!=null) {
+                                    holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(actuatorList.get(itemPosition))).removeValue();
+                                    for(int i  = itemPosition ; i < actuatorList.size() ; i++){
+                                        // save back to the firebase
+                                        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(i)).setValue(actuatorList.get(i));
                                     }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
+                                    if(itemPosition != actuatorList.size())
+                                        //remove the last item in firebase
+                                        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(actuatorList.size())).removeValue();
+                                }
                             }
                             else {Toast.makeText(holder.mMainActivity, "Can not remove this Actuator", Toast.LENGTH_SHORT).show();
                             }

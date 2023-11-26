@@ -92,10 +92,6 @@ public class SensorFragment extends Fragment {
         //mMainActivity.Notification();
         return mView;
     }
-
-
-
-
     // read data form firebase
     // Read data from Firebase for a specific sensor and update the corresponding sensor object
 

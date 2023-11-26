@@ -84,4 +84,5 @@ public class timer {
     public static List<timer> globalTimer = new ArrayList<>();
 
     public boolean is_update = false;
+    public int pos_delete = 0;
 }

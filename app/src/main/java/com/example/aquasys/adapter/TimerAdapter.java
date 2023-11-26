@@ -96,15 +96,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                                 holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(itemPosition)).removeValue()
                                         .addOnSuccessListener(aVoid -> {
                                           // Data has been removed successfully from Firebase
-                                            // Update the positions in Firebase for the remaining items
-                                            for (int i = itemPosition; i < timerList.size(); i++) {
-                                                timer timerToUpdate = timerList.get(i);
-                                                if (timerToUpdate != null) {
-                                                    holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(i)).setValue(timerToUpdate);
-                                                }
-                                            }
-                                            if(itemPosition != timerList.size())
-                                                holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(timerList.size())).removeValue();
 
                                             Toast.makeText(holder.mMainActivity, "Schedule deleted", Toast.LENGTH_SHORT).show();
                                         })
@@ -112,6 +103,15 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                                             // Handle any errors
                                             Toast.makeText(holder.mMainActivity, "Error deleting schedule", Toast.LENGTH_SHORT).show();
                                         });
+
+                                for(int i  = itemPosition ; i < timerList.size() ; i++){
+                                    // save back to the firebase
+                                    holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(i)).setValue(timerList.get(i));
+
+                                }
+                                if(itemPosition != timerList.size())
+                                    //remove the last item in firebase
+                                    holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(timerList.size())).removeValue();
                             }
                         }
                     })
@@ -123,7 +123,57 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                     .show();
             return true;
         });
+        // update the value error after delete
+        for(int i = 0 ; i < timerList.size() ; i++) {
+            holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(i)).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        int status = snapshot.getValue(Integer.class);
+                        int currentPosition = holder.getAdapterPosition();
+                        // Verify that the tim object is not null
+                        if (tim != null) {
+                            int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
+                            int onTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_enable);
+                            int onTextTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.black);
 
+                            if (status == 1) {
+                                if (timer.getGlobalTimer().get(currentPosition).getTime_stop_minute() == 0
+                                        && timer.globalTimer.get(currentPosition).getTime_start_minute() == 0
+                                        && timer.globalTimer.get(currentPosition).getTime_stop_hour() == 0
+                                        && timer.globalTimer.get(currentPosition).getTime_start_hour() == 0) {
+                                    holder.btn_timer_on_off.setChecked(false);
+                                    tim.setStatus(0);
+                                    holder.tv_timer_set.setTextColor(offTimerColor);
+                                    holder.tv_name_timer_act.setTextColor(offTimerColor);
+                                } else {
+                                    holder.btn_timer_on_off.setChecked(true);
+                                    holder.tv_timer_set.setTextColor(onTextTimerColor);
+                                    holder.tv_name_timer_act.setTextColor(onTextTimerColor);
+                                }
+                            } else if (status == 0) {
+                                holder.btn_timer_on_off.setChecked(false);
+                                holder.tv_timer_set.setTextColor(offTimerColor);
+                                holder.tv_name_timer_act.setTextColor(offTimerColor);
+                            }
+                        }
+                    } else {
+                        // Handle the case when the status data is not found
+                        // You may want to set some default values or take appropriate action
+                        // For example, setting the default status to 0 and updating the UI accordingly
+                        holder.btn_timer_on_off.setChecked(false);
+                        tim.setStatus(0);
+                        int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
+                        holder.card_timer.setBackgroundColor(offTimerColor);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(holder.mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
         //Update realtime status schedule
         holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(holder.getAdapterPosition())).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -148,13 +198,11 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                                 holder.tv_name_timer_act.setTextColor(offTimerColor);
                             } else {
                                 holder.btn_timer_on_off.setChecked(true);
-                                tim.setStatus(1);
                                 holder.tv_timer_set.setTextColor(onTextTimerColor);
                                 holder.tv_name_timer_act.setTextColor(onTextTimerColor);
                             }
                         } else if (status == 0) {
                             holder.btn_timer_on_off.setChecked(false);
-                            tim.setStatus(0);
                             holder.tv_timer_set.setTextColor(offTimerColor);
                             holder.tv_name_timer_act.setTextColor(offTimerColor);
                         }
@@ -167,10 +215,8 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                     tim.setStatus(0);
                     int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
                     holder.card_timer.setBackgroundColor(offTimerColor);
-
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(holder.mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();

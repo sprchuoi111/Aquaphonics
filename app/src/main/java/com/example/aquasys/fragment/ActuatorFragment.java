@@ -2,6 +2,7 @@ package com.example.aquasys.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -102,7 +104,10 @@ public class ActuatorFragment extends Fragment {
         // View pager for actuator fragment
         mViewPager_actuator = mView.findViewById(R.id.view_pager_actuator);
         navi_menu_actuator = mView.findViewById(R.id.navi_menu_actuator);
-
+        // Read from Firebase when the first time the app is opened
+//        Read_Data_fromFireBase_Actuator_Tree();
+//        Read_Data_fromFireBase_Actuator_Fish();
+        //initialize view pager
         setUpViewPager_adapter();
 
         // Set up click events for the items in the BottomNavigationView.
@@ -124,7 +129,7 @@ public class ActuatorFragment extends Fragment {
 
         // Now set all the FABs and all the action name
                 // texts as GONE
-                btn_add_actuator.setVisibility(View.GONE);
+        btn_add_actuator.setVisibility(View.GONE);
         btn_edit_actuator.setVisibility(View.GONE);
 
         // make the boolean variable as false, as all the
@@ -170,12 +175,13 @@ public class ActuatorFragment extends Fragment {
                 }
             }
         });
-        // Read from Firebase when the first time the app is opened
-        Read_Data_fromFireBase_Actuator_Tree();
-        Read_Data_fromFireBase_Actuator_Fish();
 
 
-        // button delete actuator
+
+
+
+
+        // button edit actuator
         btn_edit_actuator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -192,6 +198,7 @@ public class ActuatorFragment extends Fragment {
                 RecyclerView recyclerview_edit_adapter_environment = mViewDialog.findViewById(R.id.recyclerview_edit_adapter_environment);
                 RecyclerView recyclerview_edit_adapter_water = mViewDialog.findViewById(R.id.recyclerview_edit_adapter_water);
                 EditText edt_edit_description = mViewDialog.findViewById(R.id.edt_edit_description);
+                EditText edt_edit_ID = mViewDialog.findViewById(R.id.edt_edit_ID);
 
                 // Set GridLayoutManager for RecyclerView
                 recyclerview_edit_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
@@ -205,27 +212,29 @@ public class ActuatorFragment extends Fragment {
                 recyclerview_edit_adapter_environment.setAdapter(actuatorAdapter_environment_add);
                 recyclerview_edit_adapter_water.setAdapter(actuatorAdapter_water_add);
 
+
                 builder.setPositiveButton("Edit", (dialog, which) -> {
                     if (actuator.globalActuator_edit != null && actuator.globalActuator_edit.size() == 1) {
                         actuator editActuator = actuator.globalActuator_edit.get(0);
-
                         // Check if the description is empty
-                        if (edt_edit_description.getText().toString().isEmpty()) {
-                            Toast.makeText(mMainActivity, "Please fill in the description field!", Toast.LENGTH_SHORT).show();
+                        if (edt_edit_description.getText().toString().isEmpty() || edt_edit_ID.getText().toString().isEmpty()) {
+                            Toast.makeText(mMainActivity, "Please fill in the description and or ID field !", Toast.LENGTH_SHORT).show();
                             return; // Exit the method if the description is empty
                         }
-
                         // Check the type of the actuator
                         switch (editActuator.getType()) {
                             case bulb:
-                                // Update the name in the environment actuator list
+                                // Update the name and the id in the environment actuator list
                                 actuator.globalActuator_environment.get(mMainActivity.pos_edit_actuator).setName(edt_edit_description.getText().toString());
+                                actuator.globalActuator_environment.get(mMainActivity.pos_edit_actuator).setId(edt_edit_ID.getText().toString());
+
                                 break;
                             case pump:
                             case heater:
                             case feeder:
-                                // Update the name in the water actuator list
+                                // Update the name and the id in the environment actuator list
                                 actuator.globalActuator_water.get(mMainActivity.pos_edit_actuator).setName(edt_edit_description.getText().toString());
+                                actuator.globalActuator_water.get(mMainActivity.pos_edit_actuator).setId(edt_edit_ID.getText().toString());
                                 break;
                             // Add more cases if there are other types
                             default:
@@ -233,6 +242,7 @@ public class ActuatorFragment extends Fragment {
                         }
                         // Notify Firebase about the changes
                         mMainActivity.addActuatorToFireBase();
+
                     } else {
                         Toast.makeText(mMainActivity, "Please choose an adapter again, select only 1 adapter!", Toast.LENGTH_SHORT).show();
                     }
@@ -264,6 +274,7 @@ public class ActuatorFragment extends Fragment {
                 RecyclerView recyclerview_add_adapter_environment = mViewDialog.findViewById(R.id.recyclerview_add_adapter_environment);
                 RecyclerView recyclerview_add_adapter_water = mViewDialog.findViewById(R.id.recyclerview_add_adapter_water);
                 EditText edt_add_description = mViewDialog.findViewById(R.id.edt_add_description);
+                EditText edt_add_ID  = mViewDialog.findViewById(R.id.edt_add_ID);
 
                 // Set GridLayoutManager for RecyclerView
                 recyclerview_add_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
@@ -279,18 +290,19 @@ public class ActuatorFragment extends Fragment {
 
                 builder.setPositiveButton("Add", (dialog, which) -> {
                     if (actuator.globalActuator_add != null && actuator.globalActuator_add.size() == 1) {
-                        if (!edt_add_description.getText().toString().isEmpty()) {
+                        if (!edt_add_description.getText().toString().isEmpty() || edt_add_ID.getText().toString().isEmpty()) {
                             actuator.globalActuator_add.get(0).setName(edt_add_description.getText().toString());
-
+                            actuator.globalActuator_add.get(0).setId(edt_add_ID.getText().toString());
                             if (actuator.globalActuator_add.get(0).getType() == actuator.typeof_actuator.bulb) {
                                 actuator.globalActuator_environment.add(actuator.globalActuator_add.get(0));
                             } else {
                                 actuator.globalActuator_water.add(actuator.globalActuator_add.get(0));
                             }
+                            //save actuator to firebase
                             mMainActivity.addActuatorToFireBase();
                         } else {
                             // Display a toast when the conditions are not met
-                            Toast.makeText(mMainActivity, "Please fill in the name field!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mMainActivity, "Please fill in the name  and the ID field!", Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         Toast.makeText(mMainActivity, "Please choose an adapter again, select only 1 adapter!", Toast.LENGTH_SHORT).show();
@@ -307,68 +319,68 @@ public class ActuatorFragment extends Fragment {
     }
 
     // read from firebase when the first time open app
-    // Read data of actuator tree
-    private void Read_Data_fromFireBase_Actuator_Tree(){
-        mMainActivity.mDatabaseActuator_environment.addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot snapshot) {
-            List<actuator> actuatorList = new ArrayList<>();
-            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                actuator act = dataSnapshot.getValue(actuator.class);
-                // check inform in actuator list not return null
-                if (act != null) {
-                    actuatorList.add(act);
-                }
-            }
-
-            // test for reading
-            //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
-
-            actuator.globalActuator_environment = actuatorList;
-            mMainActivity.addActuatorToFireBase();
-        }
-        @Override
-        public void onCancelled(@NonNull DatabaseError error) {
-            Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
-        }
-        });
-    }
-
-    // Read data of actuator fish
-    private void Read_Data_fromFireBase_Actuator_Fish(){
-        mMainActivity.mDatabaseActuator_water.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<actuator> actuatorList = new ArrayList<>();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    actuator act = dataSnapshot.getValue(actuator.class);
-                    // check inform in actuator list not return null
-                    if (act != null) {
-                        actuatorList.add(act);
-                    }
-                }
-
-                // test for reading
-                //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
-
-                actuator.globalActuator_water = actuatorList;
-                mMainActivity.addActuatorToFireBase();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-
-    }
+//    private boolean  is_read_tree = false;
+//    // Read data of actuator tree
+//    private void Read_Data_fromFireBase_Actuator_Tree(){
+//        if(!is_read_tree) {
+//            mMainActivity.mDatabaseActuator_environment.addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                    List<actuator> actuatorList = new ArrayList<>();
+//                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+//                        actuator act = dataSnapshot.getValue(actuator.class);
+//                        // check inform in actuator list not return null
+//                        if (act != null) {
+//                            actuatorList.add(act);
+//                        }
+//                    }
+//                    // test for reading
+//                    //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
+//                    // update the list actuator environment
+//                    actuator.globalActuator_environment = actuatorList;
+//                    is_read_tree = true;
+//                }
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError error) {
+//                    Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//
+//        }
+//    }
+//    private boolean is_read_fish=  false;
+//    // Read data of actuator fish
+//    private void Read_Data_fromFireBase_Actuator_Fish(){
+//        if( ! is_read_fish) {
+//            mMainActivity.mDatabaseActuator_water.addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                    List<actuator> actuatorList = new ArrayList<>();
+//                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+//                        actuator act = dataSnapshot.getValue(actuator.class);
+//                        // check inform in actuator list not return null
+//                        if (act != null) {
+//                            actuatorList.add(act);
+//                        }
+//                    }
+//                    // test for reading
+//                    //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
+//                    actuator.globalActuator_water = actuatorList;
+//                    is_read_fish = true;
+//                }
+//
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError error) {
+//                    Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//        }
+//    }
     // Set up the ViewPager with an adapter.
     private void setUpViewPager_adapter() {
         viewPagerAdapter_actuator mViewPagerAdapter = new viewPagerAdapter_actuator(this);
         mViewPager_actuator.setAdapter(mViewPagerAdapter);
     }
-
     //Fragment actuator environment
     private void openActuatorFragment_environment() {
         if (mCurrentFragment != FRAGMENT_ACTUATOR_ENVIRONMENT) {
@@ -387,5 +399,6 @@ public class ActuatorFragment extends Fragment {
             //nếu màn hình hiện tại không ở HomeFragment thì nó sẽ chuyển sang HomeFragment đồng thời lưu giá trị tương ứng vào mCurrentFragment để kiểm tra cho các lần chọn sau
         }
     }
+
 
 }

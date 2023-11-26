@@ -161,21 +161,21 @@ public class TimerFragment extends Fragment {
         //Button select when choosing device for schedule timer
         // get list actuator for tree
         btn_done.setOnClickListener(v -> {
-            timerAdapter.notifyDataSetChanged();
+
             if (actuator.globalActuator_timer != null) {
                 int hourFrom = np_duration_hour_from.getValue();
                 int minuteFrom = np_duration_minute_from.getValue();
                 int hourTo = np_duration_hour_to.getValue();
                 int minuteTo = np_duration_minute_to.getValue();
-
-
                 if ((hourFrom < hourTo) || (hourFrom == hourTo && minuteFrom < minuteTo)) {
                     for(int i = 0 ; i <actuator.globalActuator_timer.size() ; i++ ) {
                         // Add the timer
                         timer.globalTimer.add(new timer(actuator.globalActuator_timer.get(i), hourFrom, minuteFrom, hourTo,
                                 minuteTo, 1));
                     }
+                    // find the nearest time with the the actuator and show notification
                     int nearestActuator = findNearestActuator(actuator.globalActuator_timer, hourFrom, minuteFrom);
+
                     if (nearestActuator >= 0) {
                         String formattedTimeRange = String.format("%02d:%02d - %02d:%02d", timer.globalTimer.get(nearestActuator).getTime_start_hour()
                                                                                         , timer.globalTimer.get(nearestActuator).getTime_start_minute()
@@ -184,10 +184,9 @@ public class TimerFragment extends Fragment {
                         selectedActuatorName = timer.globalTimer.get(nearestActuator).getAct().getName();
                         sendNotification(("Timer Set for " + selectedActuatorName), "Status : ON", formattedTimeRange);
                     }
-
+                    timerAdapter.notifyDataSetChanged();
                     recyclerview_timer.setAdapter(timerAdapter);
                     mMainActivity.addScheduleToFireBase();
-
                     dialog.cancel();
                     actuator.globalActuator_timer = null;
 
@@ -199,7 +198,6 @@ public class TimerFragment extends Fragment {
                 // Display a toast when temp_act is null
                 Toast.makeText(getContext(), "Please Select Actuator !!", Toast.LENGTH_SHORT).show();
             }
-
         });
         btn_close.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,10 +205,8 @@ public class TimerFragment extends Fragment {
                 dialog.cancel();
             }
         });
-
     }
     public boolean is_Read = false;
-
     // Read Scheduler data from firebase only once
     private void ReadScheduleData() {
         if (!is_Read) {
@@ -226,18 +222,15 @@ public class TimerFragment extends Fragment {
                     // Notify the adapter that the data set has changed
                     timerAdapter.notifyDataSetChanged();
                 }
-
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     Toast.makeText(mMainActivity, "Error occurred while reading", Toast.LENGTH_SHORT).show();
                 }
             });
-
             // Set the flag to true after reading data
             is_Read = true;
         }
     }
-
     public void sendNotification(String title, String content, String time) {
         // Get the layouts to use in the custom notification
         RemoteViews notificationLayout = new RemoteViews(requireContext().getPackageName(),
@@ -287,7 +280,6 @@ public class TimerFragment extends Fragment {
 
         return actuatorList.indexOf(nearestActuator);
     }
-
     // Hàm tính khoảng cách thời gian giữa hai điểm thời gian (đơn vị: phút)
     private long calculateTimeDifference(int hour1, int minute1, int hour2, int minute2) {
         return Math.abs((hour1 * 60 + minute1) - (hour2 * 60 + minute2));

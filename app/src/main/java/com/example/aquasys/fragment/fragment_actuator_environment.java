@@ -1,5 +1,6 @@
 package com.example.aquasys.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -34,7 +35,6 @@ public class fragment_actuator_environment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -43,50 +43,53 @@ public class fragment_actuator_environment extends Fragment {
         // A reference to the main view of the fragment.
         View mView = inflater.inflate(R.layout.fragment_actuator_environment, container, false); // Inflate the fragment_home layout into mView.
         mMainActivity = (MainActivity) getActivity(); // Get a reference to the hosting Activity (assumed to be MainActivity).
-
+        // update the value of the text in device
+        Read_Data_fromFireBase_Actuator_Tree();
         recyclerview_adapter_environment = mView.findViewById(R.id.recyclerview_adapter_environment); // Find the RecyclerView in the layout.
         tv_number_actuator_environment =  mView.findViewById(R.id.tv_number_actuator_environment);
-        // Setting GridLayoutManager with 2 columns for environment
+        //Setting GridLayoutManager with 2 columns for environment
         recyclerview_adapter_environment.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
         // Assuming there is a similar list for environment actuators
         int environmentActuatorSize = actuator.listActuator_environment() != null ? actuator.listActuator_environment().size() : 0;
         tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
+        // set list for sensor adapter
 
-        Read_Data_fromFireBase_Actuator_Tree();
         return mView;
     }
+    private boolean is_read = false;
     // Read data of actuator tree
     public void Read_Data_fromFireBase_Actuator_Tree(){
-        mMainActivity.mDatabaseActuator_environment.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<actuator> actuatorList = new ArrayList<>();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    actuator act = dataSnapshot.getValue(actuator.class);
-                    // check inform in actuator list not return null
-                    if (act != null) {
-                        actuatorList.add(act);
+
+            mMainActivity.mDatabaseActuator_environment.addValueEventListener(new ValueEventListener() {
+
+                @SuppressLint("NotifyDataSetChanged")
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    List<actuator> actuatorList = new ArrayList<>();
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        actuator act = dataSnapshot.getValue(actuator.class);
+                        // check inform in actuator list not return null
+                        if (act != null) {
+                            actuatorList.add(act);
+                        }
                     }
+                    // test for reading
+                    //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
+                    actuator.globalActuator_environment = actuatorList;
+                    // notify data change for the actuator lis
+                    actuatorAdapter_environment = new ActuatorAdapter_environment(actuator.globalActuator_environment, (act, position) -> {
+                    });
+                    recyclerview_adapter_environment.setAdapter(actuatorAdapter_environment);
+                    int environmentActuatorSize = actuator.globalActuator_environment.size();
+                    tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
                 }
 
-                // test for reading
-                //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+                }
 
-                actuator.globalActuator_environment = actuatorList;
+            });
 
-                // set list for sensor adapter
-                actuatorAdapter_environment = new ActuatorAdapter_environment(actuator.listActuator_environment(), (act, position) -> {
-                });
-                recyclerview_adapter_environment.setAdapter(actuatorAdapter_environment);
-                int environmentActuatorSize = actuator.globalActuator_environment != null ? actuator.globalActuator_environment.size() : 0;
-                tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
-                mMainActivity.addActuatorToFireBase();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }
