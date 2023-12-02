@@ -114,18 +114,20 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
             holder.img_actuator.setImageResource(finalImg_actuator_off);
             holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
             }
+            actuatorList.get(itemPosition).setFlag(true);
             //save actuator to firebase
-            holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(holder.getAdapterPosition())).child("status").setValue(actuatorList.get(itemPosition).getStatus()).addOnSuccessListener(aVoid -> {
+            holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("status").setValue(actuatorList.get(itemPosition).getStatus()).addOnSuccessListener(aVoid -> {
                         // Data has been saved successfully
+                    holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("flag").setValue( actuatorList.get(itemPosition).getFlag());
                     })
                     .addOnFailureListener(e -> {
                         // Handle any errors
                         Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
                     });
-            actuatorList.get(itemPosition).setFlag(true);
-        });
 
-        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(holder.getAdapterPosition())).child("status").addValueEventListener(new ValueEventListener() {
+        });
+        //update status actuator in real time
+        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("status").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -177,6 +179,83 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
 
         });
 
+        // update the flag when hardware send
+        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("flag").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    boolean flag = snapshot.getValue(boolean.class);
+                    actuator.globalActuator_environment.get(itemPosition).setFlag(flag);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
+            }
+        });
+        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(holder.getAdapterPosition())).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    int status = snapshot.getValue(int.class);
+                    actuator.listActuator_environment().get(itemPosition).setStatus(status);
+                    // set list for sensor adapter
+                    // Check realtime state
+                    //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
+                    // change state of button
+                    int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
+                    int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
+                        if (status == 1) {
+                            if (actuator.listActuator_environment().get(itemPosition).getHour() == 0 && actuator.listActuator_environment().get(itemPosition).getMinute() == 0) {
+                                holder.btn_actuator.setChecked(false);
+                                act.setStatus(0);
+                                holder.img_actuator.setImageResource(finalImg_actuator_off);
+                                holder.card_actuator.setCardBackgroundColor(off_actuator);
+                                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+
+                                //Toast.makeText(holder.mMainActivity, "Please choose time for activate" , Toast.LENGTH_SHORT).show();
+                            } else {
+                                holder.card_actuator.setCardBackgroundColor(on_actuator);
+                                holder.btn_actuator.setChecked(true);
+                                holder.img_actuator.setImageResource(finalImg_actuator_on);
+                                holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_on)));
+
+                                act.setStatus(1);
+                            }
+                        }
+                        if (status == 0) {
+                            holder.btn_actuator.setChecked(false);
+                            act.setStatus(0);
+                            holder.img_actuator.setImageResource(finalImg_actuator_off);
+                            holder.card_actuator.setCardBackgroundColor(off_actuator);
+                            holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
+                        }
+
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // update realtime actuator for tree in firebase
+        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("name").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String name = snapshot.getValue(String.class);
+                    actuator.globalActuator_environment.get(itemPosition).setName(name);
+                    holder.tv_name_actuator.setText(name);
+                    // set list for sensor adapter
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         holder.btn_set_duration.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(holder.mMainActivity);
             View diaLogView = holder.mMainActivity.getLayoutInflater().inflate(R.layout.dialog_set_duration_actuator, null);
@@ -212,22 +291,7 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
             dialog.show();
         });
 
-        // update realtime actuator for tree in firebase
-        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(holder.getAdapterPosition())).child("name").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    String name = snapshot.getValue(String.class);
-                    actuator.listActuator_water().get(itemPosition).setName(name);
-                    holder.tv_name_actuator.setText(name);
-                    // set list for sensor adapter
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
-            }
-        });
+
         // Remove Actuator
         holder.card_actuator.setOnLongClickListener(new View.OnLongClickListener() {
             @SuppressLint("NotifyDataSetChanged")
@@ -241,7 +305,7 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                             //If 'currentPosition' is a valid position
                             int itemPosition = holder.getAdapterPosition();
-                            if (itemPosition > 1) {
+                            if (itemPosition > 1 && actuatorList.get(itemPosition).getStatus() == 0) {
                                 // Remove the room at 'currentPosition' from mListRoom.
 
                                 // get the actuator delete
@@ -251,7 +315,7 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                                 notifyDataSetChanged();
                                 // delete value of actuator in adapter position
                                 if(actuatorToRemove!=null) {
-                                    holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(actuatorList.get(itemPosition))).removeValue();
+                                    holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).removeValue();
                                     for(int i  = itemPosition ; i < actuatorList.size() ; i++){
                                         // save back to the firebase
                                         holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(i)).setValue(actuatorList.get(i));

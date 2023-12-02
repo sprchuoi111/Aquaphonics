@@ -7,21 +7,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/for_environment"
-        android:textStyle="bold"/>
+        android:text="Descript"
+        android:textStyle="bold"
+        android:id="@+id/description_edit"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/recyclerview_edit_adapter_environment"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/for_fish"
-        android:textStyle="bold"/>
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/recyclerview_edit_adapter_water"/>
+        android:id="@+id/recyclerview_edit_adapter"/>
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,16 +24,6 @@
             android:layout_height="wrap_content"
             android:hint="@string/description"
             android:id="@+id/edt_edit_description"/>
-    </com.google.android.material.textfield.TextInputLayout>
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/id"
-            android:id="@+id/edt_edit_ID"/>
     </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>

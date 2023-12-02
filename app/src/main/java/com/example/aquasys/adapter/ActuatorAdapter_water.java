@@ -117,6 +117,8 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
             //save status actuator to firebase
             holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).child("status").setValue(actuatorList.get(itemPosition).getStatus()).addOnSuccessListener(aVoid -> {
                         // Data has been saved successfully
+                        holder.mMainActivity.mDatabaseSensor_water.child(String.valueOf(holder.getAdapterPosition())).child("flag").setValue( actuatorList.get(itemPosition).getFlag());
+
                     })
                     .addOnFailureListener(e -> {
                         // Handle any errors
@@ -126,19 +128,18 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
         });
 
             // update realtime actuator for fish in firebase
-            holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(holder.getAdapterPosition())).child("status").addValueEventListener(new ValueEventListener() {
-                @Override
+            holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(holder.getAdapterPosition())).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
                         int status = snapshot.getValue(int.class);
-                        actuator.listActuator_water().get(itemPosition).setStatus(status);
+                        actuator.globalActuator_water.get(itemPosition).setStatus(status);
                         // set list for sensor adapter
                         // Check realtime state
                         //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
                         // change state of button
                         int off_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.off_actuator);
                         int on_actuator = ContextCompat.getColor(holder.mMainActivity, R.color.on_actuator);
-                        if(!actuatorList.get(itemPosition).getFlag()) {
                             if (status == 1) {
                                 if (actuator.listActuator_water().get(itemPosition).getHour() == 0 && actuator.listActuator_water().get(itemPosition).getMinute() == 0) {
                                     holder.btn_actuator.setChecked(false);
@@ -164,7 +165,6 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                                 holder.card_actuator.setCardBackgroundColor(off_actuator);
                                 holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
                             }
-                        }
 
                     }
                 }
@@ -179,7 +179,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     int status = snapshot.getValue(int.class);
-                    actuator.listActuator_water().get(itemPosition).setStatus(status);
+                    actuator.globalActuator_water.get(itemPosition).setStatus(status);
                     // set list for sensor adapter
                     // Check realtime state
                     //Toast.makeText(mMainActivity , "state button : " + actuator.listActuator().get(actuatorIndex).getStatus(),Toast.LENGTH_SHORT).show();
@@ -221,7 +221,22 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                 Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
             }
         });
-        // update realtime actuator for fish in firebase
+
+        // update the flag when hardware send
+        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("flag").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    boolean flag = snapshot.getValue(boolean.class);
+                    actuator.globalActuator_water.get(itemPosition).setFlag(flag);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(holder.mMainActivity, "Error when read data", Toast.LENGTH_SHORT).show();
+            }
+        });
+        // update name in realtime actuator for fish in firebase
         holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(holder.getAdapterPosition())).child("name").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -250,11 +265,11 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                             //If 'currentPosition' is a valid position
                             int itemPosition = holder.getAdapterPosition();
-                            if (itemPosition > 2) {
+                            if (itemPosition > 2 && actuatorList.get(itemPosition).getStatus() == 0) {
 
                                 // delete value of actuator in adapter position
                                 // Get the timer object to be removed from Firebase
-                                actuator actuatorToRemove = actuator.globalActuator_environment.get(itemPosition);
+                                actuator actuatorToRemove = actuator.globalActuator_water.get(itemPosition);
                                 // Remove the room at 'currentPosition' from mListRoom.
                                 actuatorList.remove(itemPosition);
                                 notifyDataSetChanged();

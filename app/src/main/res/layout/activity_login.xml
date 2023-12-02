@@ -7,8 +7,13 @@
     tools:context=".MainActivity"
     android:gravity="center"
     android:orientation="vertical"
+    android:background="#ECF9FF"
     >
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
+        android:src="@drawable/logoaqua"></ImageView>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
