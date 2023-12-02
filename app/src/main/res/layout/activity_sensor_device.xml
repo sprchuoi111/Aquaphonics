@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SensorDevice">
+    tools:context=".SensorDevice"
+    android:background="#ECF9FF">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/sensor_toolbar"
@@ -16,8 +17,9 @@
         android:layout_alignParentLeft="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:background="?attr/colorPrimary"
-        app:layout_constraintTop_toTopOf="parent">
+        android:background="#ECF9FF"
+        app:layout_constraintTop_toTopOf="parent"
+        >
 
     </androidx.appcompat.widget.Toolbar>
 

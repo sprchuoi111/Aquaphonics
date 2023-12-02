@@ -10,7 +10,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#F3EEEA"
+        app:cardBackgroundColor="@color/white"
         app:cardElevation="20dp"
         app:cardCornerRadius="30dp"
         android:layout_margin="15dp"
@@ -47,13 +47,6 @@
         android:id="@+id/recyclerview_sensor_water"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-    <ToggleButton
-        android:id="@+id/setMode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textOff="@string/auto"
-        android:textOn="@string/manual"
-        android:layout_gravity="center|bottom"
-        android:layout_marginBottom="40dp"/>
+
 
 </LinearLayout>

@@ -165,9 +165,7 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                             holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
                         }
                     }
-                    else {
-                        Toast.makeText(holder.mMainActivity, "button check ", Toast.LENGTH_LONG).show();
-                    }
+
                 }
 
             }
@@ -305,7 +303,7 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                             //If 'currentPosition' is a valid position
                             int itemPosition = holder.getAdapterPosition();
-                            if (itemPosition > 1 && actuatorList.get(itemPosition).getStatus() == 0) {
+                            if (itemPosition > 1 && actuatorList.get(itemPosition).getStatus() == 0 && !actuatorList.get(itemPosition).isIs_schedule()) {
                                 // Remove the room at 'currentPosition' from mListRoom.
 
                                 // get the actuator delete

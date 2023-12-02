@@ -72,7 +72,13 @@ public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdap
                 if (isChecked) {
                     if (actuator.globalActuator_timer == null) {
                         actuator.globalActuator_timer = new ArrayList<>();
+
                     }
+                    if (actuatorList.get(itemPosition).getType() == actuator.typeof_actuator.bulb)
+                    {
+                        actuator.globalActuator_environment.get(itemPosition).setIs_schedule(true);
+                    }
+                    else actuator.globalActuator_water.get(itemPosition).setIs_schedule(true);
                     actuator.globalActuator_timer.add(act);
                 } else {
                     if (actuator.globalActuator_timer != null) {

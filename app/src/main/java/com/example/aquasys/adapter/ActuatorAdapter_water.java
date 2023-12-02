@@ -223,7 +223,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
         });
 
         // update the flag when hardware send
-        holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(itemPosition)).child("flag").addValueEventListener(new ValueEventListener() {
+        holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(itemPosition)).child("flag").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -265,7 +265,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                             //If 'currentPosition' is a valid position
                             int itemPosition = holder.getAdapterPosition();
-                            if (itemPosition > 2 && actuatorList.get(itemPosition).getStatus() == 0) {
+                            if (itemPosition > 2 && actuatorList.get(itemPosition).getStatus() == 0 && !actuatorList.get(itemPosition).isIs_schedule()) {
 
                                 // delete value of actuator in adapter position
                                 // Get the timer object to be removed from Firebase
