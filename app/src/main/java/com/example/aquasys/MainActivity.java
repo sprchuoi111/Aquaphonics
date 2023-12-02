@@ -180,38 +180,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // Manage user information
+    @SuppressLint("SetTextI18n")
     private void getUserInformation() {
 
         // Method to check user authentication and redirect to the login page if necessary
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        DatabaseReference usersRef = database.getReference("users");
-        FirebaseUser currentUser = auth.getCurrentUser();
-        if (currentUser != null) {
-            String uid = currentUser.getUid();
-
-            // Check the user's login state in the database
-//            usersRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                    if(snapshot.exists()){
-//                        // User is already logged in on another device
-//                        // Log out from the original device
-//                        auth.signOut();
-//                    }
-//                    else {
-//                        // Mark the user as logged in on the new device
-//                        usersRef.child(uid).setValue(true);
-//                        // Proceed with the login on the new device
-//                    }
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError error) {
-//
-//                }
-//            });
-        }
         // get user
         //Firebase
         FirebaseUser user = auth.getCurrentUser();
@@ -222,6 +196,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
             finish();
         }
+        // Display in the email
+        NavigationView navigation_view = (NavigationView) findViewById(R.id.navigation_view);
+        assert user != null;
+        String email_name = user.getEmail();
+        TextView headerTextView = navigation_view.getHeaderView(0).findViewById(R.id.header_email); // Replace with the actual ID of your header TextView
+        headerTextView.setText(email_name); // Set the text to the desired value
 
     }
 

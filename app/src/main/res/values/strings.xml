@@ -51,5 +51,6 @@
     <string name="for_plant">FOR PLANT</string>
     <string name="id">ID</string>
     <string name="name">Name</string>
+    <string name="empty">Empty</string>
 
 </resources>

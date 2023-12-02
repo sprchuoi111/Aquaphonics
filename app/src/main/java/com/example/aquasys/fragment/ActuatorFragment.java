@@ -111,9 +111,7 @@ public class ActuatorFragment extends Fragment {
             public boolean onItemSelect(int i) {
                 if (i == 0) {
                     openActuatorFragment_environment();
-                    Toast.makeText(mMainActivity , "0" , Toast.LENGTH_SHORT).show();
                 } else if (i == 1) {
-                    Toast.makeText(mMainActivity , "1" , Toast.LENGTH_SHORT).show();
                     openActuatorFragment_water();
                 }
                 return true;
