@@ -224,7 +224,7 @@ public class fragment_actuator_water extends Fragment {
 
                 builder.setPositiveButton("Add", (dialog, which) -> {
                     if (actuator.globalActuator_add != null && actuator.globalActuator_add.size() == 1) {
-                        if (!edt_add_description.getText().toString().isEmpty() || edt_add_ID.getText().toString().isEmpty()) {
+                        if (!edt_add_description.getText().toString().isEmpty() && !edt_add_ID.getText().toString().isEmpty()) {
                             actuator.globalActuator_add.get(0).setName(edt_add_description.getText().toString());
                             actuator.globalActuator_add.get(0).setId(edt_add_ID.getText().toString());
                             actuator.globalActuator_water.add(actuator.globalActuator_add.get(0));
@@ -234,6 +234,8 @@ public class fragment_actuator_water extends Fragment {
                             //save actuator to firebase
                             mMainActivity.addActuatorToFireBase();
                             actuatorAdapter_water.notifyDataSetChanged();
+                            int waterActuatorSize = actuator.listActuator_water() != null ? actuator.listActuator_water().size() : 0;
+                            tv_number_actuator_water.setText(waterActuatorSize + " Devices");
                         } else {
                             // Display a toast when the conditions are not met
                             Toast.makeText(mMainActivity, "Please fill in the name  and the ID field!", Toast.LENGTH_SHORT).show();
@@ -282,5 +284,30 @@ public class fragment_actuator_water extends Fragment {
                     Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
                 }
             });
+
+        mMainActivity.mDatabaseActuator_water.addValueEventListener(new ValueEventListener() {
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<actuator> actuatorList = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    actuator act = dataSnapshot.getValue(actuator.class);
+                    // check inform in actuator list not return null
+                    if (act != null) {
+                        actuatorList.add(act);
+                    }
+                }
+                // test for reading
+                //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
+                int environmentActuatorSize = actuatorList.size();
+                tv_number_actuator_water.setText(environmentActuatorSize + " Devices");
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+            }
+
+        });
     }
 }
