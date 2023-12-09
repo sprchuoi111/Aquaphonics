@@ -2,14 +2,9 @@
 Aquaphonics system - Stm32 - ESP 
 
 #App 
-Done : public sensor to git , data processing ( Schedule , Actuator , data of sensor) 
+Done : Basic app UI for interface , complete interract with firebase ( authendication , realtime database ) 
 
-# Task( Not DONE) : 
-+ dev Chart for sensor ( update everyday , week)
-+ improve UI
-+ fix Firebase : error handle ( not internet connected) 
-+ Notify on phone
-+ Connect Firebase with ESP32 
+Function : add schedule , add actuator , read sensor  ,.. 
 
 Login : 
 UID : quangbinhlxcity@gmail.com
