@@ -104,10 +104,10 @@ public class sensor {
     // sensor list for aqua
     public static List<sensor> listSensor_environment() {
         if (globalSensor_enviroment.isEmpty()) {
-            globalSensor_enviroment.add(new sensor("Humidity", "null", R.drawable.humidity_percentage, typeofsensor.humidity , "ENS00001"));
-            globalSensor_enviroment.add(new sensor("Temperature", "null", R.drawable.device_thermostat, typeofsensor.temp ,"ENS00002"));
-            globalSensor_enviroment.add(new sensor("Light Sensor", "null", R.drawable.light_mode, typeofsensor.light, "ENS00003"));
-            globalSensor_enviroment.add(new sensor("Moisture Humi", "null", R.drawable.soil, typeofsensor.soil_moisture , "ENS00004"));
+            globalSensor_enviroment.add(new sensor("Humidity", "-1", R.drawable.humidity_percentage, typeofsensor.humidity , "ENS00001"));
+            globalSensor_enviroment.add(new sensor("Temperature", "-1", R.drawable.device_thermostat, typeofsensor.temp ,"ENS00002"));
+            globalSensor_enviroment.add(new sensor("Light Sensor", "-1", R.drawable.light_mode, typeofsensor.light, "ENS00003"));
+            globalSensor_enviroment.add(new sensor("Moisture Humi", "-1", R.drawable.soil, typeofsensor.soil_moisture , "ENS00004"));
 
         }
         return globalSensor_enviroment;
@@ -115,8 +115,8 @@ public class sensor {
     // sensor list for hydro
     public static List<sensor> listSensor_water() {
         if (globalSensor_water.isEmpty()) {
-            globalSensor_water.add(new sensor("PH","null", R.drawable.ph , typeofsensor.ph , "WTS00001"));
-            globalSensor_water.add(new sensor("Water Level", "null",R.drawable.water_level , typeofsensor.level_water , "WTS00002"));
+            globalSensor_water.add(new sensor("PH","-1", R.drawable.ph , typeofsensor.ph , "WTS00001"));
+            globalSensor_water.add(new sensor("Water Level", "-1",R.drawable.water_level , typeofsensor.level_water , "WTS00002"));
         }
         return globalSensor_water;
     }
