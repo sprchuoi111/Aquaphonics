@@ -57,11 +57,23 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
         if (tim == null) {
             return;
         }
+        int startHour = tim.getTime_start_hour();
+        int startMinute = tim.getTime_start_minute();
+        String amPm;
 
+        if (startHour <= 12) {
+            amPm = "AM";
+            if (startHour == 0) {
+                startHour = 12; // Convert 0 AM to 12 AM
+            }
+        } else {
+            amPm = "PM";
+            startHour -= 12; // Convert 24-hour format to 12-hour format
+        }
         holder.tv_name_timer_act.setText(tim.getAct().getName());
-        @SuppressLint("DefaultLocale") String time = String.format("%02d:%02d-%02d:%02d",
-                tim.getTime_start_hour(), tim.getTime_start_minute(),
-                tim.getTime_stop_hour(), tim.getTime_stop_minute());
+        @SuppressLint("DefaultLocale") String time = String.format("%02d:%02d %s",
+                startHour, startMinute ,amPm );
+        holder.tv_name_timer_act.setText(tim.getAct().getName());
         holder.tv_timer_set.setText(time);
 
 // Set image for timer using Glide (assuming you have an image resource ID)
@@ -124,56 +136,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
             return true;
         });
         // update the value error after delete
-        for(int i = 0 ; i < timerList.size() ; i++) {
-            holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(i)).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        int status = snapshot.getValue(Integer.class);
-                        int currentPosition = holder.getAdapterPosition();
-                        // Verify that the tim object is not null
-                        if (tim != null) {
-                            int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
-                            int onTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_enable);
-                            int onTextTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.black);
-
-                            if (status == 1) {
-                                if (timer.getGlobalTimer().get(currentPosition).getTime_stop_minute() == 0
-                                        && timer.globalTimer.get(currentPosition).getTime_start_minute() == 0
-                                        && timer.globalTimer.get(currentPosition).getTime_stop_hour() == 0
-                                        && timer.globalTimer.get(currentPosition).getTime_start_hour() == 0) {
-                                    holder.btn_timer_on_off.setChecked(false);
-                                    tim.setStatus(0);
-                                    holder.tv_timer_set.setTextColor(offTimerColor);
-                                    holder.tv_name_timer_act.setTextColor(offTimerColor);
-                                } else {
-                                    holder.btn_timer_on_off.setChecked(true);
-                                    holder.tv_timer_set.setTextColor(onTextTimerColor);
-                                    holder.tv_name_timer_act.setTextColor(onTextTimerColor);
-                                }
-                            } else if (status == 0) {
-                                holder.btn_timer_on_off.setChecked(false);
-                                holder.tv_timer_set.setTextColor(offTimerColor);
-                                holder.tv_name_timer_act.setTextColor(offTimerColor);
-                            }
-                        }
-                    } else {
-                        // Handle the case when the status data is not found
-                        // You may want to set some default values or take appropriate action
-                        // For example, setting the default status to 0 and updating the UI accordingly
-                        holder.btn_timer_on_off.setChecked(false);
-                        tim.setStatus(0);
-                        int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
-                        holder.card_timer.setBackgroundColor(offTimerColor);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(holder.mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
         //Update realtime status schedule
         holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(holder.getAdapterPosition())).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -184,23 +146,13 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                     // Verify that the tim object is not null
                     if (tim != null) {
                         int offTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_disable);
-                        int onTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.card_timer_enable);
                         int onTextTimerColor = ContextCompat.getColor(holder.mMainActivity, R.color.black);
 
                         if (status == 1) {
-                            if (timer.getGlobalTimer().get(currentPosition).getTime_stop_minute() == 0
-                                    && timer.globalTimer.get(currentPosition).getTime_start_minute() == 0
-                                    && timer.globalTimer.get(currentPosition).getTime_stop_hour() == 0
-                                    && timer.globalTimer.get(currentPosition).getTime_start_hour() == 0) {
-                                holder.btn_timer_on_off.setChecked(false);
-                                tim.setStatus(0);
-                                holder.tv_timer_set.setTextColor(offTimerColor);
-                                holder.tv_name_timer_act.setTextColor(offTimerColor);
-                            } else {
-                                holder.btn_timer_on_off.setChecked(true);
-                                holder.tv_timer_set.setTextColor(onTextTimerColor);
-                                holder.tv_name_timer_act.setTextColor(onTextTimerColor);
-                            }
+                           holder.btn_timer_on_off.setChecked(true);
+                           holder.tv_timer_set.setTextColor(onTextTimerColor);
+                           holder.tv_name_timer_act.setTextColor(onTextTimerColor);
+
                         } else if (status == 0) {
                             holder.btn_timer_on_off.setChecked(false);
                             holder.tv_timer_set.setTextColor(offTimerColor);
@@ -234,41 +186,40 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
             // mapping for num picker in layout edit schedule
             NumberPicker np_edit_duration_hour_from = diaLogView.findViewById(R.id.np_edit_duration_hour_from);
             NumberPicker np_edit_duration_minute_from = diaLogView.findViewById(R.id.np_edit_duration_minute_from);
-            NumberPicker np_edit_duration_hour_to = diaLogView.findViewById(R.id.np_edit_duration_hour_to);
-            NumberPicker np_edit_duration_minute_to = diaLogView.findViewById(R.id.np_edit_duration_minute_to);
+            NumberPicker np_edit_duration_am_pm = diaLogView.findViewById(R.id.np_edit_duration_am_pm);
             // set threshold for num picker
-            np_edit_duration_hour_from.setMaxValue(23);
+            np_edit_duration_hour_from.setMaxValue(12);
             np_edit_duration_hour_from.setMinValue(0);
             np_edit_duration_minute_from.setMaxValue(59);
             np_edit_duration_minute_from.setMinValue(0);
-            np_edit_duration_hour_to.setMaxValue(23);
-            np_edit_duration_hour_to.setMinValue(0);
-            np_edit_duration_minute_to.setMaxValue(59);
-            np_edit_duration_minute_to.setMinValue(0);
+            //set AM and PM for time picker
+            String[] displayedValues = {"AM", "PM"};
+            np_edit_duration_am_pm.setMinValue(0);
+            np_edit_duration_am_pm.setMaxValue(displayedValues.length - 1);
+            np_edit_duration_am_pm.setDisplayedValues(displayedValues);
             // set time initiate for num picker when
-            np_edit_duration_hour_from.setValue(timerList.get(currentPosition).getTime_start_hour());
+            if(timerList.get(currentPosition).getTime_start_hour() < 12){
+                np_edit_duration_hour_from.setValue(timerList.get(currentPosition).getTime_start_hour());
+                np_edit_duration_am_pm.setValue(0);
+            }
+            else {
+                np_edit_duration_hour_from.setValue(timerList.get(currentPosition).getTime_start_hour() - 12);
+                np_edit_duration_am_pm.setValue(1);
+            }
             np_edit_duration_minute_from.setValue(timerList.get(currentPosition).getTime_start_minute());
-            np_edit_duration_hour_to.setValue(timerList.get(currentPosition).getTime_stop_hour());
-            np_edit_duration_minute_to.setValue(timerList.get(currentPosition).getTime_stop_minute());
             builder.setPositiveButton("Confirm", (dialog, which) -> {
-                int hourFrom = np_edit_duration_hour_from.getValue();
-                int minuteFrom = np_edit_duration_minute_from.getValue();
-                int hourTo = np_edit_duration_hour_to.getValue();
-                int minuteTo = np_edit_duration_minute_to.getValue();
-
-                if ((hourFrom < hourTo) || (hourFrom == hourTo && minuteFrom < minuteTo)) {
-                    // change the schedule time
-                    timerList.get(currentPosition).setTime_start_hour(hourFrom);
-                    timerList.get(currentPosition).setTime_start_minute(minuteFrom);
-                    timerList.get(currentPosition).setTime_stop_hour(hourTo);
-                    timerList.get(currentPosition).setTime_stop_minute(minuteTo);
-                    notifyDataSetChanged();
-                    //push timer to firebase after change the setting time of timer
-                    holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(currentPosition)).setValue(timerList.get(currentPosition));
-                } else {
-                    // Display a toast when the conditions are not met
-                    Toast.makeText(holder.mMainActivity, "Please choose again!!", Toast.LENGTH_SHORT).show();
+                int hourFrom = 0 ;
+                if(np_edit_duration_am_pm.getValue() == 0 ) {
+                    hourFrom = np_edit_duration_hour_from.getValue();
                 }
+                else hourFrom = np_edit_duration_hour_from.getValue() + 12 ;
+                int minuteFrom = np_edit_duration_minute_from.getValue();
+                // change the schedule time
+                timerList.get(currentPosition).setTime_start_hour(hourFrom);
+                timerList.get(currentPosition).setTime_start_minute(minuteFrom);
+                notifyDataSetChanged();
+                //push timer to firebase after change the setting time of timer
+                holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(currentPosition)).setValue(timerList.get(currentPosition));
 
             });
             builder.setNegativeButton("Cancel" ,null);

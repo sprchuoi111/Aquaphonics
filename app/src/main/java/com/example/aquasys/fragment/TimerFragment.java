@@ -49,8 +49,7 @@ import java.util.Objects;
 public class TimerFragment extends Fragment {
 
     private static final int NOTIFICATION_ID = 1;
-    private NumberPicker np_duration_hour_from , np_duration_minute_from ;
-    private NumberPicker np_duration_hour_to , np_duration_minute_to ;
+    private NumberPicker np_duration_hour_from , np_duration_minute_from , np_duration_am_pm;
     private MainActivity mMainActivity;
     private RecyclerView recyclerview_timer;
     private TimerAdapter timerAdapter;
@@ -144,57 +143,64 @@ public class TimerFragment extends Fragment {
         FloatingActionButton btn_close = mViewDialog.findViewById(R.id.btn_close);
         np_duration_hour_from = mViewDialog.findViewById(R.id.np_duration_hour_from);
         np_duration_minute_from = mViewDialog.findViewById(R.id.np_duration_minute_from);
-        np_duration_hour_to = mViewDialog.findViewById(R.id.np_duration_hour_to);
-        np_duration_minute_to = mViewDialog.findViewById(R.id.np_duration_minute_to);
+        np_duration_am_pm = mViewDialog.findViewById(R.id.np_duration_am_pm);
         // set max && min for np
-        np_duration_hour_from.setMaxValue(23);
+        np_duration_hour_from.setMaxValue(12);
         np_duration_hour_from.setMinValue(0);
         np_duration_minute_from.setMaxValue(59);
         np_duration_minute_from.setMinValue(0);
-        np_duration_hour_to.setMaxValue(23);
-        np_duration_hour_to.setMinValue(0);
-        np_duration_minute_to.setMaxValue(59);
-        np_duration_minute_to.setMinValue(0);
-        // set condition for np value of minute and hour
-        np_duration_hour_to.setValue(np_duration_hour_from.getValue());
+        //set AM and PM for time picker
+
+        String[] displayedValues = {"AM", "PM"};
+        np_duration_am_pm.setMinValue(0);
+        np_duration_am_pm.setMaxValue(displayedValues.length - 1);
+        np_duration_am_pm.setDisplayedValues(displayedValues);
 
         //Button select when choosing device for schedule timer
         // get list actuator for tree
         btn_done.setOnClickListener(v -> {
 
             if (actuator.globalActuator_timer != null) {
-                int hourFrom = np_duration_hour_from.getValue();
+                int hourFrom = 0;
+                if (np_duration_am_pm.getValue() == 0) {
+                    hourFrom = np_duration_hour_from.getValue();
+                } else hourFrom = np_duration_hour_from.getValue() + 12;
                 int minuteFrom = np_duration_minute_from.getValue();
-                int hourTo = np_duration_hour_to.getValue();
-                int minuteTo = np_duration_minute_to.getValue();
-                if ((hourFrom < hourTo) || (hourFrom == hourTo && minuteFrom < minuteTo)) {
-                    for(int i = 0 ; i <actuator.globalActuator_timer.size() ; i++ ) {
-                        // Add the timer
-                        timer.globalTimer.add(new timer(actuator.globalActuator_timer.get(i), hourFrom, minuteFrom, hourTo,
-                                minuteTo, 1));
+                for (int i = 0; i < actuator.globalActuator_timer.size(); i++) {
+                    // Add the timer
+                    if(actuator.globalActuator_timer.get(i).getMinute() == 0 &&actuator.globalActuator_timer.get(i).getHour() == 0 ) {
+                        Toast.makeText(mMainActivity, "Please select time for schedule ! ", Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                    // find the nearest time with the the actuator and show notification
-                    int nearestActuator = findNearestActuator(actuator.globalActuator_timer, hourFrom, minuteFrom);
-
-                    if (nearestActuator >= 0) {
-                        String formattedTimeRange = String.format("%02d:%02d - %02d:%02d", timer.globalTimer.get(nearestActuator).getTime_start_hour()
-                                                                                        , timer.globalTimer.get(nearestActuator).getTime_start_minute()
-                                                                                        , timer.globalTimer.get(nearestActuator).getTime_stop_hour()
-                                                                                        ,timer.globalTimer.get(nearestActuator).getTime_stop_minute());
-                        selectedActuatorName = timer.globalTimer.get(nearestActuator).getAct().getName();
-                        sendNotification(("Timer Set for " + selectedActuatorName), "Status : ON", formattedTimeRange);
-                    }
-                    timerAdapter.notifyDataSetChanged();
-                    recyclerview_timer.setAdapter(timerAdapter);
-                    mMainActivity.addScheduleToFireBase();
-                    dialog.cancel();
-                    actuator.globalActuator_timer = null;
-
-                } else {
-                    // Display a toast when the conditions are not met
-                    Toast.makeText(getContext(), "Please choose again!!", Toast.LENGTH_SHORT).show();
+                    timer.globalTimer.add(new timer(actuator.globalActuator_timer.get(i), hourFrom, minuteFrom, 1));
                 }
-            } else {
+                // find the nearest time with the the actuator and show notification
+                int nearestActuator = findNearestActuator(actuator.globalActuator_timer, hourFrom, minuteFrom);
+                int startHour = timer.globalTimer.get(nearestActuator).getTime_start_hour();
+                int startMinute = timer.globalTimer.get(nearestActuator).getTime_start_minute();
+                String amPm;
+
+                if (startHour <= 12) {
+                    amPm = "AM";
+                    if (startHour == 0) {
+                        startHour = 12; // Convert 0 AM to 12 AM
+                    }
+                } else {
+                    amPm = "PM";
+                    startHour -= 12; // Convert 24-hour format to 12-hour format
+                }
+
+                @SuppressLint("DefaultLocale") String formattedTimeRange = String.format("%02d:%02d %s", startHour, startMinute, amPm);
+
+                selectedActuatorName = timer.globalTimer.get(nearestActuator).getAct().getName();
+                sendNotification(("Timer Set for " + selectedActuatorName), "Status : ON", formattedTimeRange);
+                timerAdapter.notifyDataSetChanged();
+                recyclerview_timer.setAdapter(timerAdapter);
+                mMainActivity.addScheduleToFireBase();
+                dialog.cancel();
+                actuator.globalActuator_timer = null;
+            }
+            else {
                 // Display a toast when temp_act is null
                 Toast.makeText(getContext(), "Please Select Actuator !!", Toast.LENGTH_SHORT).show();
             }
