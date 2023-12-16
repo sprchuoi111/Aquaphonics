@@ -68,17 +68,11 @@ public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdap
                 actuator.globalActuator_timer = null;
                 int itemPosition = holder.getAdapterPosition();
                 actuator act = actuatorList.get(itemPosition);
-
+                // Add the select list of actuator to the timer actuator for create new timer
                 if (isChecked) {
                     if (actuator.globalActuator_timer == null) {
                         actuator.globalActuator_timer = new ArrayList<>();
-
                     }
-                    if (actuatorList.get(itemPosition).getType() == actuator.typeof_actuator.bulb)
-                    {
-                        actuator.globalActuator_environment.get(itemPosition).setIs_schedule(true);
-                    }
-                    else actuator.globalActuator_water.get(itemPosition).setIs_schedule(true);
                     actuator.globalActuator_timer.add(act);
                 } else {
                     if (actuator.globalActuator_timer != null) {
@@ -87,8 +81,6 @@ public class TimerActuatorAdapter extends RecyclerView.Adapter<TimerActuatorAdap
                 }
             }
         });
-
-
     }
 
     @Override

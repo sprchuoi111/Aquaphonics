@@ -1,6 +1,7 @@
 package com.example.aquasys.fragment;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.example.aquasys.MainActivity;
@@ -37,12 +39,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.SimpleTimeZone;
 
 public class SensorFragment extends Fragment {
 
     private static final String CHANEL_1_ID = "666";
+    private static final String CHANEL_MAIN = "111";
     private static final String CHANEL_2_ID = "2";
     private RecyclerView recyclerview_sensor_environment; // recyclerView for sensor
     private RecyclerView recyclerview_sensor_water; // recyclerView for sensor
@@ -99,14 +105,10 @@ public class SensorFragment extends Fragment {
         // Realtime database reading sensor check environment
         for (int i = 0; i <= sensor.listSensor_environment().size(); i++) {
             ReadSensorData_Environment(i);
-            if (Integer.parseInt(sensor.listSensor_environment().get(0).getValue()) < 50 || Integer.parseInt(sensor.listSensor_environment().get(1).getValue()) > 35)
-                sendNotification_environment();
         }
         // Realtime database reading sensor check water-qualify
         for (int j = 0; j < sensor.listSensor_water().size(); j++) {
             ReadSensorData_Water(j);
-            if (Integer.parseInt(sensor.listSensor_water().get(1).getValue()) < 10)
-                sendNotification_water();
         }
         // notification of sensor value
         //mMainActivity.Notification();
@@ -130,6 +132,9 @@ public class SensorFragment extends Fragment {
                     recyclerview_sensor_environment.setAdapter(sensorAdapter_environment);
                     // checking data
                     //Toast.makeText(mMainActivity, sensorName + " Data Received : " +sensor.listSensor().gset(sensorIndex).getValue(), Toast.LENGTH_SHORT).show();
+                    sendCustomNotification();
+                    if (Integer.parseInt(sensor.listSensor_environment().get(0).getValue()) < 50 || Integer.parseInt(sensor.listSensor_environment().get(1).getValue()) > 35)
+                        sendNotification_environment();
                 }
             }
 
@@ -159,6 +164,9 @@ public class SensorFragment extends Fragment {
                     recyclerview_sensor_water.setAdapter(sensorAdapter_water);
                     // checking data
                     //Toast.makeText(mMainActivity, sensorName + " Data Received : " +sensor.listSensor().get(sensorIndex).getValue(), Toast.LENGTH_SHORT).show();
+                    sendCustomNotification();
+                    if (Integer.parseInt(sensor.listSensor_water().get(1).getValue()) < 10)
+                        sendNotification_water();
                 }
             }
 
@@ -178,6 +186,7 @@ public class SensorFragment extends Fragment {
                 .setSmallIcon(R.drawable.aquaphonic)
                 .setLargeIcon(bitmap)
                 .setColor(getResources().getColor(R.color.blue))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(mMainActivity);
         if (ActivityCompat.checkSelfPermission(mMainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -201,6 +210,7 @@ public class SensorFragment extends Fragment {
                 .setContentText("Please fill your pool")
                 .setSmallIcon(R.drawable.aquaphonic)
                 .setLargeIcon(bitmap)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(getResources().getColor(R.color.blue))
                 .build();
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(mMainActivity);
@@ -215,6 +225,43 @@ public class SensorFragment extends Fragment {
             return;
         }
         notificationManager.notify(Integer.parseInt(CHANEL_2_ID), notification);
+
+    }
+    private void sendCustomNotification(){
+        RemoteViews notificationLayout = new RemoteViews(mMainActivity.getPackageName() , R.layout.small_notification_layout);
+        notificationLayout.setTextViewText(R.id.notification_title , "Monitor ");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        String strDate = sdf.format(new Date());
+        notificationLayout.setTextViewText(R.id.time_notification , strDate);
+
+        // Notification Expand
+        RemoteViews notificationLayoutExpanded = new RemoteViews(mMainActivity.getPackageName() , R.layout.notification_layout);
+        // mapping information in layout
+        notificationLayoutExpanded.setTextViewText(R.id.tv_humidity_val , sensor.listSensor_environment().get(0).getValue());
+        notificationLayoutExpanded.setTextViewText(R.id.tv_temperature_val , sensor.listSensor_environment().get(1).getValue());
+        notificationLayoutExpanded.setTextViewText(R.id.tv_light_val , sensor.listSensor_environment().get(2).getValue());
+        notificationLayoutExpanded.setTextViewText(R.id.tv_soil_val , sensor.listSensor_environment().get(3).getValue());
+        notificationLayoutExpanded.setTextViewText(R.id.tv_ph_val, sensor.listSensor_water().get(0).getValue());
+        notificationLayoutExpanded.setTextViewText(R.id.tv_waterlevel_val, sensor.listSensor_water().get(1).getValue());
+        Notification notification = new NotificationCompat.Builder(mMainActivity, MyApplication.CHANNEL_ID_WATER)
+                .setSmallIcon(R.drawable.aquaphonic)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setColor(getResources().getColor(R.color.blue))
+                .setCustomContentView(notificationLayout)
+                .setCustomBigContentView(notificationLayoutExpanded)
+                .build();
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(mMainActivity);
+        if (ActivityCompat.checkSelfPermission(mMainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        notificationManager.notify(Integer.parseInt(CHANEL_MAIN), notification);
 
     }
 

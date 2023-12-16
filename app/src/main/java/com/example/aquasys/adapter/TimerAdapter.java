@@ -76,16 +76,14 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
         holder.tv_name_timer_act.setText(tim.getAct().getName());
         holder.tv_timer_set.setText(time);
 
+
 // Set image for timer using Glide (assuming you have an image resource ID)
+
+
         Glide.with(holder.itemView.getContext())
                 .load(tim.getAct().getImg())
                 .placeholder(R.drawable.unknown) // Add a placeholder image resource
                 .into(holder.img_actuator_timer);
-
-
-
-
-
         holder.card_timer.setOnLongClickListener(v -> {
             // Get adapter position of ViewHolder in RecyclerView and assign it to 'currentPosition'.
             int itemPosition = holder.getAdapterPosition();
@@ -105,25 +103,46 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                             notifyDataSetChanged();
                             // Remove the timer with the current position in Firebase
                             if (timerToRemove != null) {
+
+                                // set the flag is_schedule to false when delete actuator
+                                // Check the act in timer is water actuator or environment water
+                                if(timerToRemove.getAct().getType() == actuator.typeof_actuator.bulb){
+                                    for(int i = 0 ; i < actuator.globalActuator_environment.size() ; i++){
+                                        // With the water actuator
+                                        if(timerToRemove.getAct().getId().equals(actuator.globalActuator_environment.get(i).getId())) {
+                                            actuator.globalActuator_environment.get(i).setIs_schedule(false);
+                                            //push flag back to firebase when set the flag to false state
+                                            holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(i)).child("is_schedule").setValue(actuator.globalActuator_environment.get(i).isIs_schedule());
+                                        }
+                                    }
+                                }
+                                else {
+                                    for(int j = 0 ; j < actuator.globalActuator_water.size() ; j++){
+                                        // With the environment actuator
+                                        if(timerToRemove.getAct().getId().equals(actuator.globalActuator_water.get(j).getId())) {
+                                            actuator.globalActuator_water.get(j).setIs_schedule(false);
+                                            //push flag back to firebase when set the flag to false state
+                                            holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(j)).child("is_schedule").setValue(actuator.globalActuator_water.get(j).isIs_schedule());
+                                        }
+                                    }
+                                }
                                 holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(itemPosition)).removeValue()
                                         .addOnSuccessListener(aVoid -> {
                                           // Data has been removed successfully from Firebase
-
                                             Toast.makeText(holder.mMainActivity, "Schedule deleted", Toast.LENGTH_SHORT).show();
                                         })
                                         .addOnFailureListener(e -> {
                                             // Handle any errors
                                             Toast.makeText(holder.mMainActivity, "Error deleting schedule", Toast.LENGTH_SHORT).show();
                                         });
-
                                 for(int i  = itemPosition ; i < timerList.size() ; i++){
                                     // save back to the firebase
                                     holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(i)).setValue(timerList.get(i));
-
                                 }
                                 if(itemPosition != timerList.size())
                                     //remove the last item in firebase
                                     holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(timerList.size())).removeValue();
+
                             }
                         }
                     })
@@ -135,6 +154,7 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                     .show();
             return true;
         });
+
         // update the value error after delete
         //Update realtime status schedule
         holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(holder.getAdapterPosition())).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -198,14 +218,17 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
             np_edit_duration_am_pm.setMaxValue(displayedValues.length - 1);
             np_edit_duration_am_pm.setDisplayedValues(displayedValues);
             // set time initiate for num picker when
+
             if(timerList.get(currentPosition).getTime_start_hour() < 12){
                 np_edit_duration_hour_from.setValue(timerList.get(currentPosition).getTime_start_hour());
                 np_edit_duration_am_pm.setValue(0);
             }
+
             else {
                 np_edit_duration_hour_from.setValue(timerList.get(currentPosition).getTime_start_hour() - 12);
                 np_edit_duration_am_pm.setValue(1);
             }
+
             np_edit_duration_minute_from.setValue(timerList.get(currentPosition).getTime_start_minute());
             builder.setPositiveButton("Confirm", (dialog, which) -> {
                 int hourFrom = 0 ;
@@ -220,15 +243,14 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
                 notifyDataSetChanged();
                 //push timer to firebase after change the setting time of timer
                 holder.mMainActivity.mDatabaseSchedule.child(String.valueOf(currentPosition)).setValue(timerList.get(currentPosition));
-
             });
             builder.setNegativeButton("Cancel" ,null);
             AlertDialog dialog = builder.create();
             dialog.show();
-
         });
 
         // setting enable for the button
+
         holder.btn_timer_on_off.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

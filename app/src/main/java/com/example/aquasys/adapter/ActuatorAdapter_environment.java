@@ -305,7 +305,6 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                             int itemPosition = holder.getAdapterPosition();
                             if (itemPosition > 1 && actuatorList.get(itemPosition).getStatus() == 0 && !actuatorList.get(itemPosition).isIs_schedule()) {
                                 // Remove the room at 'currentPosition' from mListRoom.
-
                                 // get the actuator delete
                                 // Get the timer object to be removed from Firebase
                                 actuator actuatorToRemove = actuator.globalActuator_environment.get(itemPosition);

@@ -166,14 +166,40 @@ public class TimerFragment extends Fragment {
                     hourFrom = np_duration_hour_from.getValue();
                 } else hourFrom = np_duration_hour_from.getValue() + 12;
                 int minuteFrom = np_duration_minute_from.getValue();
+
                 for (int i = 0; i < actuator.globalActuator_timer.size(); i++) {
                     // Add the timer
-                    if(actuator.globalActuator_timer.get(i).getMinute() == 0 &&actuator.globalActuator_timer.get(i).getHour() == 0 ) {
+                    if(actuator.globalActuator_timer.get(i).getMinute() == 0 &&actuator.globalActuator_timer.get(i).getHour() == 0  ) {
                         Toast.makeText(mMainActivity, "Please select time for schedule ! ", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    if(actuator.globalActuator_timer.get(i).isIs_schedule()){
+                        Toast.makeText(mMainActivity, "Actuator is scheduled !!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    // Set flag is_schedule for actuator timer to true
+                    // check the type of actuator in global actuator timer is used for environment
+                    if(actuator.globalActuator_timer.get(i).getType() == actuator.typeof_actuator.bulb){
+                        for(int j = 0 ; j < actuator.globalActuator_environment.size() ; j++){
+                            if(actuator.globalActuator_environment.get(j).getId().equals(actuator.globalActuator_timer.get(i).getId())) {
+                                actuator.globalActuator_environment.get(j).setIs_schedule(true);
+                                mMainActivity.mDatabaseActuator_environment.child(String.valueOf(j)).child("is_schedule").setValue(true);
+                            }
+                        }
+                    }
+                    else {
+                        for(int j = 0 ; j < actuator.globalActuator_water.size() ; j++){
+                            if(actuator.globalActuator_water.get(j).getId().equals(actuator.globalActuator_timer.get(i).getId())) {
+                                actuator.globalActuator_water.get(j).setIs_schedule(true);
+                                mMainActivity.mDatabaseActuator_water.child(String.valueOf(j)).child("is_schedule").setValue(true);
+                            }
+                        }
+                    }
                     timer.globalTimer.add(new timer(actuator.globalActuator_timer.get(i), hourFrom, minuteFrom, 1));
+
+
                 }
+
                 // find the nearest time with the the actuator and show notification
                 int nearestActuator = findNearestActuator(actuator.globalActuator_timer, hourFrom, minuteFrom);
                 int startHour = timer.globalTimer.get(nearestActuator).getTime_start_hour();
@@ -191,20 +217,23 @@ public class TimerFragment extends Fragment {
                 }
 
                 @SuppressLint("DefaultLocale") String formattedTimeRange = String.format("%02d:%02d %s", startHour, startMinute, amPm);
-
                 selectedActuatorName = timer.globalTimer.get(nearestActuator).getAct().getName();
                 sendNotification(("Timer Set for " + selectedActuatorName), "Status : ON", formattedTimeRange);
                 timerAdapter.notifyDataSetChanged();
                 recyclerview_timer.setAdapter(timerAdapter);
                 mMainActivity.addScheduleToFireBase();
                 dialog.cancel();
+                // make clear global actuator
                 actuator.globalActuator_timer = null;
             }
+
             else {
                 // Display a toast when temp_act is null
                 Toast.makeText(getContext(), "Please Select Actuator !!", Toast.LENGTH_SHORT).show();
             }
+
         });
+
         btn_close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
