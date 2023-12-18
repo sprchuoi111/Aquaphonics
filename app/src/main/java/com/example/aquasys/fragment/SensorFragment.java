@@ -243,7 +243,7 @@ public class SensorFragment extends Fragment {
         notificationLayoutExpanded.setTextViewText(R.id.tv_soil_val , sensor.listSensor_environment().get(3).getValue());
         notificationLayoutExpanded.setTextViewText(R.id.tv_ph_val, sensor.listSensor_water().get(0).getValue());
         notificationLayoutExpanded.setTextViewText(R.id.tv_waterlevel_val, sensor.listSensor_water().get(1).getValue());
-        Notification notification = new NotificationCompat.Builder(mMainActivity, MyApplication.CHANNEL_ID_WATER)
+        Notification notification = new NotificationCompat.Builder(mMainActivity, MyApplication.CHANNEL_ID)
                 .setSmallIcon(R.drawable.aquaphonic)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(getResources().getColor(R.color.blue))

@@ -49,6 +49,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final int FRAGMENT_SENSOR = 0;
     private static final int FRAGMENT_ACTUATOR = 1;
@@ -189,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // get user
         //Firebase
         FirebaseUser user = auth.getCurrentUser();
+        // Display in the email
+        NavigationView navigation_view = (NavigationView) findViewById(R.id.navigation_view);
 
         if (user == null) {
             // User is not logged in, so redirect to the login page
@@ -196,12 +200,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
             finish();
         }
-        // Display in the email
-        NavigationView navigation_view = (NavigationView) findViewById(R.id.navigation_view);
-        assert user != null;
-        String email_name = user.getEmail();
-        TextView headerTextView = navigation_view.getHeaderView(0).findViewById(R.id.header_email); // Replace with the actual ID of your header TextView
-        headerTextView.setText(email_name); // Set the text to the desired value
+        else {
+            String email_name = Objects.requireNonNull(user).getEmail();
+            TextView headerTextView = navigation_view.getHeaderView(0).findViewById(R.id.header_email); // Replace with the actual ID of your header TextView
+            headerTextView.setText(email_name); // Set the text to the desired value
+        }
+
 
     }
 

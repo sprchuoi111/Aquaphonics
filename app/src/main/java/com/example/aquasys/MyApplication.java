@@ -9,6 +9,7 @@ public class MyApplication extends Application {
     public static final String CHANNEL_ID_ENVIRONMENT = "notification_environment";
     public static final String CHANNEL_ID_WATER = "notification_water";
 
+
     @Override
     public void onCreate() {
         super.onCreate();
