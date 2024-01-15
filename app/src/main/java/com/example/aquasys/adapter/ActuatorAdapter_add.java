@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -55,7 +56,7 @@ public class ActuatorAdapter_add extends RecyclerView.Adapter<ActuatorAdapter_ad
             default: break;
 
         }
-
+        //holder.tv_timeractuator.setText(act.getName());
 
         holder.btn_actuator.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -92,11 +93,13 @@ public class ActuatorAdapter_add extends RecyclerView.Adapter<ActuatorAdapter_ad
     public static class ActuatorViewHolder extends RecyclerView.ViewHolder{
 
         private final ToggleButton btn_actuator;
+        private final TextView tv_timeractuator;
         MainActivity mMainactivity;
         public ActuatorViewHolder(@NonNull View itemView) {
             super(itemView);
             btn_actuator = itemView.findViewById(R.id.btn_actuator);
             mMainactivity = (MainActivity) itemView.getContext();
+            tv_timeractuator = itemView.findViewById(R.id.tv_timeractuator);
         }
     }
 }

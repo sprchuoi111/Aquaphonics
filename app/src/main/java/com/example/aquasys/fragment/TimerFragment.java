@@ -38,10 +38,12 @@ import com.example.aquasys.adapter.TimerActuatorAdapter;
 import com.example.aquasys.adapter.TimerAdapter;
 import com.example.aquasys.object.actuator;
 import com.example.aquasys.object.timer;
+import com.example.aquasys.system.SharedPreferencesHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.List;
 import java.util.Objects;
@@ -82,24 +84,20 @@ public class TimerFragment extends Fragment {
         mMainActivity = (MainActivity) getContext();
         FloatingActionButton btn_timer = mView.findViewById(R.id.btn_timer);
         btn_timer.setOnClickListener(v -> showBottomDiaLog());
-
         // Define a boolean variable to keep track of the currently selected button
-
         // Inflate the layout for this fragment.
         recyclerview_timer = mView.findViewById(R.id.recyclerview_timer); // Find the RecyclerView in the layout.
         // setting show sensor list in the recyclerview
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
         recyclerview_timer.setLayoutManager(linearLayoutManager);
-
         // set list for sensor adapter
         timerAdapter = new TimerAdapter(timer.globalTimer, (tim, position) -> {
-
         });
         recyclerview_timer.setAdapter(timerAdapter);
         recyclerview_timer.addItemDecoration(new DividerItemDecoration(recyclerview_timer.getContext(), DividerItemDecoration.VERTICAL));
-
         //read data from schedule firebase
-        if(timer.globalTimer.isEmpty())
+        List<timer> retrievedTimerList = SharedPreferencesHelper.getListFromSharedPreferences(mMainActivity, "schedule", new TypeToken<List<timer>>() {});
+        if(retrievedTimerList == null)
             ReadScheduleData();
         return mView;
     }
@@ -116,7 +114,6 @@ public class TimerFragment extends Fragment {
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
         dialog.getWindow().setGravity(Gravity.BOTTOM);
-
         mMainActivity.tmp_actuator = null;
         //processing imf in bottom sheet
         // Set a recyclerview
@@ -215,13 +212,13 @@ public class TimerFragment extends Fragment {
                     amPm = "PM";
                     startHour -= 12; // Convert 24-hour format to 12-hour format
                 }
-
                 @SuppressLint("DefaultLocale") String formattedTimeRange = String.format("%02d:%02d %s", startHour, startMinute, amPm);
                 selectedActuatorName = timer.globalTimer.get(nearestActuator).getAct().getName();
                 sendNotification(("Timer Set for " + selectedActuatorName), "Status : ON", formattedTimeRange);
                 timerAdapter.notifyDataSetChanged();
                 recyclerview_timer.setAdapter(timerAdapter);
                 mMainActivity.addScheduleToFireBase();
+                SharedPreferencesHelper.saveListToSharedPreferences(mMainActivity, timer.globalTimer , "schedule");
                 dialog.cancel();
                 // make clear global actuator
                 actuator.globalActuator_timer = null;
@@ -285,7 +282,7 @@ public class TimerFragment extends Fragment {
         // Add the snooze action button to the custom layout
         notificationLayout.setOnClickPendingIntent(R.id.button_snooze, snoozePendingIntent);
 
-        Notification notification = new NotificationCompat.Builder(requireContext(), MyApplication.CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(requireContext(), String.valueOf(MyApplication.CHANNEL_ID))
                 .setSmallIcon(R.drawable.timer)
                 .setContent(notificationLayout)
                 .setContentIntent(snoozePendingIntent) // Set the default content intent if the user taps on the notification body

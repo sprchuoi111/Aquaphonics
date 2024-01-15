@@ -38,6 +38,7 @@ dependencies {
     implementation("com.google.firebase:firebase-database:20.3.0")
     implementation("com.google.firebase:firebase-auth:22.2.0")
     implementation("androidx.core:core-ktx:+")
+    implementation("com.google.firebase:firebase-firestore:24.10.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -54,4 +55,9 @@ dependencies {
     implementation ("com.google.android.material:material:1.11.0-beta01")
     // new lib for smooth navigation bar
     implementation ("com.github.ibrahimsn98:SmoothBottomBar:1.7.9")
+    // sending email
+    implementation ( "com.jakewharton.timber:timber:5.0.1" ) // for logging
+    implementation ("com.sun.mail:android-mail:1.6.5") // for email sending
+    implementation ("com.github.AnyChart:AnyChart-Android:1.1.5") // lib draw chard
+    implementation ("com.google.code.gson:gson:2.8.9") // lib store to json
 }

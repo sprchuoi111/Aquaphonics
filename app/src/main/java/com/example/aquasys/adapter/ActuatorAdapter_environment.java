@@ -124,6 +124,8 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                         // Handle any errors
                         Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
                     });
+            holder.mMainActivity.sendActuatorToFireBase_environment(itemPosition);
+
 
         });
         //update status actuator in real time
@@ -164,6 +166,7 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                             holder.card_actuator.setCardBackgroundColor(off_actuator);
                             holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
                         }
+                        holder.mMainActivity.sendActuatorToFireBase_environment(itemPosition);
                     }
 
                 }

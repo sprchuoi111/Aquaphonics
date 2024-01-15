@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.aquasys.fragment.ActuatorFragment;
+import com.example.aquasys.fragment.LogFragment;
 import com.example.aquasys.fragment.SensorFragment;
 import com.example.aquasys.fragment.TimerFragment;
 
@@ -24,6 +25,8 @@ public class viewPagerAdapter extends FragmentStateAdapter {
                 return new ActuatorFragment();
             case 2 :
                 return new TimerFragment();
+            case 3:
+                return  new LogFragment();
             default:
                 return new SensorFragment();
         }
@@ -33,6 +36,6 @@ public class viewPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 3;
+        return 4;
     }
 }

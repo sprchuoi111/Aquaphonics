@@ -56,5 +56,7 @@
     <string name="id">ID</string>
     <string name="name">Name</string>
     <string name="empty">Empty</string>
+    <string name="export">Export</string>
+    <string name="history">History</string>
 
 </resources>

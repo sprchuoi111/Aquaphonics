@@ -125,6 +125,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                         Toast.makeText(holder.mMainActivity, "Error saving data", Toast.LENGTH_SHORT).show();
                     });;
                     actuatorList.get(itemPosition).setFlag(true);
+                    holder.mMainActivity.sendActuatorToFireBase_water(itemPosition);
         });
 
             // update realtime actuator for fish in firebase
@@ -212,6 +213,7 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                             holder.card_actuator.setCardBackgroundColor(off_actuator);
                             holder.tv_name_actuator.setTextColor(ColorStateList.valueOf(holder.mMainActivity.getResources().getColor(R.color.tv_actuator_off)));
                         }
+                        holder.mMainActivity.sendActuatorToFireBase_water(itemPosition);
                     }
 
                 }

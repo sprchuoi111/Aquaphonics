@@ -17,7 +17,10 @@
     <item android:id="@+id/nav_account"
         android:title="@string/grp_account">
         <menu>
-
+            <item
+                android:id="@+id/export"
+                android:title="@string/export"
+                android:icon="@drawable/log_share"/>
             <item
                 android:id="@+id/change_password"
                 android:title="@string/change_password"
@@ -26,6 +29,7 @@
                 android:id="@+id/logout"
                 android:title="@string/logout"
                 android:icon="@drawable/logout_40px" />
+
         </menu>
     </item>
 </menu>

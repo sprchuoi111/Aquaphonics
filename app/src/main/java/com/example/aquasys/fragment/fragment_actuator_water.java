@@ -22,11 +22,13 @@ import com.example.aquasys.adapter.ActuatorAdapter_add;
 import com.example.aquasys.adapter.ActuatorAdapter_environment;
 import com.example.aquasys.adapter.ActuatorAdapter_water;
 import com.example.aquasys.object.actuator;
+import com.example.aquasys.system.SharedPreferencesHelper;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +59,13 @@ public class fragment_actuator_water extends Fragment {
 
         tv_number_actuator_water = mView.findViewById(R.id.tv_number_actuator_water);
         recyclerview_adapter_water = mView.findViewById(R.id.recyclerview_adapter_water);
+        // check for loading actuator water
         Read_Data_fromFireBase_Actuator_Fish();
         // Setting GridLayoutManager with 2 columns for water
         recyclerview_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
         // set the actuator in the first time load the recyclerView
         // mapping button
-        btn_add_actuator_fish   = mView.findViewById(R.id.btn_add_actuator_fish);
+        btn_add_actuator_fish  = mView.findViewById(R.id.btn_add_actuator_fish);
         btn_edit_actuator_fish = mView.findViewById(R.id.btn_edit_actuator_fish);
         btn_menu_actuator_fish = mView.findViewById(R.id.btn_menu_actuator_fish);
         int waterActuatorSize = actuator.listActuator_water() != null ? actuator.listActuator_water().size() : 0;
@@ -115,12 +118,6 @@ public class fragment_actuator_water extends Fragment {
                 }
             }
         });
-
-
-
-
-
-
         // button edit actuator
         btn_edit_actuator_fish.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("NotifyDataSetChanged")
@@ -128,13 +125,11 @@ public class fragment_actuator_water extends Fragment {
             public void onClick(View v) {
                 // Set actuator list to edit to null
                 actuator.globalActuator_edit = null;
-
                 AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
                 @SuppressLint("InflateParams") View mViewDialog = mMainActivity.getLayoutInflater().inflate(R.layout.dialog_edit_actuator, null);
                 builder.setView(mViewDialog);
                 builder.setTitle("Edit Actuator");
                 builder.setIcon(R.drawable.edit);
-
                 // Mapping for components in the dialog layout
                 RecyclerView recyclerview_edit_adapter_water = mViewDialog.findViewById(R.id.recyclerview_edit_adapter);
                 EditText edt_edit_description = mViewDialog.findViewById(R.id.edt_edit_description);
@@ -142,14 +137,10 @@ public class fragment_actuator_water extends Fragment {
                 description_edit.setText(R.string.for_fish);
                 // Set GridLayoutManager for RecyclerView
                 recyclerview_edit_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
-
                 // Set data for actuator in the timer
-                ActuatorAdapter_add actuatorAdapter_water_add = new ActuatorAdapter_add(actuator.listActuator_water());
-
+                ActuatorAdapter_add actuatorAdapter_water_add = new ActuatorAdapter_add(actuator.globalActuator_water);
                 // Set RecyclerView with adapter
                 recyclerview_edit_adapter_water.setAdapter(actuatorAdapter_water_add);
-
-
                 builder.setPositiveButton("Edit", (dialog, which) -> {
                     if (actuator.globalActuator_edit != null && actuator.globalActuator_edit.size() == 1) {
                         actuator editActuator = actuator.globalActuator_edit.get(0);
@@ -205,23 +196,18 @@ public class fragment_actuator_water extends Fragment {
                 builder.setView(mViewDialog);
                 builder.setTitle("Add actuator");
                 builder.setIcon(R.drawable.add);
-
                 // Mapping for components in the dialog layout
                 RecyclerView recyclerview_add_adapter_water = mViewDialog.findViewById(R.id.recyclerview_add_adapter);
                 TextView description_add = mViewDialog.findViewById(R.id.description_add);
                 EditText edt_add_description = mViewDialog.findViewById(R.id.edt_add_description);
                 EditText edt_add_ID  = mViewDialog.findViewById(R.id.edt_add_ID);
                 description_add.setText(R.string.for_fish);
-
                 // Set GridLayoutManager for RecyclerView
                 recyclerview_add_adapter_water.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
-
                 // Set data for actuator in the timer
                 ActuatorAdapter_add actuatorAdapter_water_add = new ActuatorAdapter_add(actuator.listActuator_water_add());
-
                 // Set RecyclerView with adapter
                 recyclerview_add_adapter_water.setAdapter(actuatorAdapter_water_add);
-
                 builder.setPositiveButton("Add", (dialog, which) -> {
                     if (actuator.globalActuator_add != null && actuator.globalActuator_add.size() == 1) {
                         if (!edt_add_description.getText().toString().isEmpty() && !edt_add_ID.getText().toString().isEmpty()) {
@@ -236,6 +222,7 @@ public class fragment_actuator_water extends Fragment {
                             actuatorAdapter_water.notifyDataSetChanged();
                             int waterActuatorSize = actuator.listActuator_water() != null ? actuator.listActuator_water().size() : 0;
                             tv_number_actuator_water.setText(waterActuatorSize + " Devices");
+                            SharedPreferencesHelper.saveListToSharedPreferences(mMainActivity, actuator.globalActuator_water, "actuator_water");
                         } else {
                             // Display a toast when the conditions are not met
                             Toast.makeText(mMainActivity, "Please fill in the name  and the ID field!", Toast.LENGTH_SHORT).show();
@@ -255,36 +242,11 @@ public class fragment_actuator_water extends Fragment {
     private boolean is_Read = false;
 
     public void Read_Data_fromFireBase_Actuator_Fish() {
-            mMainActivity.mDatabaseActuator_water.addListenerForSingleValueEvent(new ValueEventListener() {
-                @SuppressLint({"SetTextI18n", "NotifyDataSetChanged"})
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    List<actuator> actuatorList = new ArrayList<>();
-                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                        actuator act = dataSnapshot.getValue(actuator.class);
-                        // check inform in actuator list not return null
-                        if (act != null) {
-                            actuatorList.add(act);
-                        }
-                    }
-                    // test for reading
-                    //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
-                    actuator.globalActuator_water = actuatorList;
-                    actuatorAdapter_water = new ActuatorAdapter_water(actuator.globalActuator_water, (act, position) -> {
-                    });
-                    recyclerview_adapter_water.setAdapter(actuatorAdapter_water);
-                    int waterActuatorSize = actuator.globalActuator_water.size();
-                    tv_number_actuator_water.setText(waterActuatorSize + " Devices");
-                    is_Read = true;
-                }
-
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
-                }
-            });
-
+        actuatorAdapter_water = new ActuatorAdapter_water(actuator.globalActuator_water, (act, position) -> {
+        });
+        recyclerview_adapter_water.setAdapter(actuatorAdapter_water);
+        int waterActuatorSize = actuator.globalActuator_water.size();
+        tv_number_actuator_water.setText(waterActuatorSize + " Devices");
         mMainActivity.mDatabaseActuator_water.addValueEventListener(new ValueEventListener() {
 
             @SuppressLint("NotifyDataSetChanged")

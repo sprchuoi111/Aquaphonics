@@ -39,10 +39,8 @@ public class NoInternetActivity extends AppCompatActivity {
                     progress_bar_connection.setVisibility(View.INVISIBLE);
                 }
             }, 3000);
-
         });
     }
-
     public boolean InternetIsConnected() {
         try {
             String command = "ping -c 1 google.com";

@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,6 +38,7 @@ import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.reflect.TypeToken;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import java.util.ArrayList;
@@ -118,68 +120,19 @@ public class ActuatorFragment extends Fragment {
             }
 
         });
-        // Display the number of environment actuators in the list
+        // get list actuator
+        //for the Actuator environment
+        List<actuator> retrievedActuatorList_environment = com.example.aquasys.system.SharedPreferencesHelper.getListFromSharedPreferences(mMainActivity, "actuator_environment", new TypeToken<List<actuator>>() {
+        });
+        if (retrievedActuatorList_environment == null)
+            Read_Data_fromFireBase_Actuator_Tree();
+        // for the Actuator water
+        List<actuator> retrievedActuatorList_water = com.example.aquasys.system.SharedPreferencesHelper.getListFromSharedPreferences(mMainActivity, "actuator_water", new TypeToken<List<actuator>>() {
+        });
+        if (retrievedActuatorList_water == null)
+            Read_Data_fromFireBase_Actuator_Fish();
         return mView;
     }
-
-    // read from firebase when the first time open app
-//    private boolean  is_read_tree = false;
-//    // Read data of actuator tree
-//    private void Read_Data_fromFireBase_Actuator_Tree(){
-//        if(!is_read_tree) {
-//            mMainActivity.mDatabaseActuator_environment.addListenerForSingleValueEvent(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                    List<actuator> actuatorList = new ArrayList<>();
-//                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-//                        actuator act = dataSnapshot.getValue(actuator.class);
-//                        // check inform in actuator list not return null
-//                        if (act != null) {
-//                            actuatorList.add(act);
-//                        }
-//                    }
-//                    // test for reading
-//                    //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
-//                    // update the list actuator environment
-//                    actuator.globalActuator_environment = actuatorList;
-//                    is_read_tree = true;
-//                }
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError error) {
-//                    Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//
-//        }
-//    }
-//    private boolean is_read_fish=  false;
-//    // Read data of actuator fish
-//    private void Read_Data_fromFireBase_Actuator_Fish(){
-//        if( ! is_read_fish) {
-//            mMainActivity.mDatabaseActuator_water.addListenerForSingleValueEvent(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                    List<actuator> actuatorList = new ArrayList<>();
-//                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-//                        actuator act = dataSnapshot.getValue(actuator.class);
-//                        // check inform in actuator list not return null
-//                        if (act != null) {
-//                            actuatorList.add(act);
-//                        }
-//                    }
-//                    // test for reading
-//                    //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
-//                    actuator.globalActuator_water = actuatorList;
-//                    is_read_fish = true;
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError error) {
-//                    Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//        }
-//    }
     // Set up the ViewPager with an adapter.
     private void setUpViewPager_adapter() {
         viewPagerAdapter_actuator mViewPagerAdapter = new viewPagerAdapter_actuator(this);
@@ -202,6 +155,55 @@ public class ActuatorFragment extends Fragment {
             mCurrentFragment = FRAGMENT_ACTUATOR_WATER;
             //nếu màn hình hiện tại không ở HomeFragment thì nó sẽ chuyển sang HomeFragment đồng thời lưu giá trị tương ứng vào mCurrentFragment để kiểm tra cho các lần chọn sau
         }
+    }
+
+    // Read data of actuator tree
+    public void Read_Data_fromFireBase_Actuator_Tree(){
+        mMainActivity.mDatabaseActuator_environment.addListenerForSingleValueEvent(new ValueEventListener() {
+            @SuppressLint({"NotifyDataSetChanged", "SetTextI18n"})
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<actuator> actuatorList = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    actuator act = dataSnapshot.getValue(actuator.class);
+                    // check inform in actuator list not return null
+                    if (act != null) {
+                        actuatorList.add(act);
+                    }
+                }
+                actuator.globalActuator_environment = actuatorList;
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void Read_Data_fromFireBase_Actuator_Fish() {
+        mMainActivity.mDatabaseActuator_water.addListenerForSingleValueEvent(new ValueEventListener() {
+            @SuppressLint({"SetTextI18n", "NotifyDataSetChanged"})
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<actuator> actuatorList = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    actuator act = dataSnapshot.getValue(actuator.class);
+                    // check inform in actuator list not return null
+                    if (act != null) {
+                        actuatorList.add(act);
+                    }
+                }
+                // test for reading
+                //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
+                actuator.globalActuator_water = actuatorList;
+                actuatorAdapter_water = new ActuatorAdapter_water(actuator.globalActuator_water, (act, position) -> {
+                });
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
