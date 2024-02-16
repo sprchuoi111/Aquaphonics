@@ -8,14 +8,14 @@ import android.os.Handler;
 
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
-import com.example.aquasys.network.NetworkChangeReceiver;
+import com.example.aquasys.network.NotificationBroadcastReceiver;
 
 public class LoadingPage extends AppCompatActivity  {
     // create hander for loadding page
     private Handler handler;
     private MainActivity mMainactivity;
 
-    private NetworkChangeReceiver networkChangeReceiver;
+    private NotificationBroadcastReceiver networkChangeReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

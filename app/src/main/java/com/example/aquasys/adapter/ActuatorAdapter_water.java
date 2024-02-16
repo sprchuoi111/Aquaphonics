@@ -283,11 +283,12 @@ public class ActuatorAdapter_water extends RecyclerView.Adapter<ActuatorAdapter_
                                     for(int i  = itemPosition ; i < actuatorList.size() ; i++){
                                         // save back to the firebase
                                         holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(i)).setValue(actuatorList.get(i));
-
                                     }
                                     if(itemPosition != actuatorList.size())
                                         //remove the last item in firebase
                                         holder.mMainActivity.mDatabaseActuator_water.child(String.valueOf(actuatorList.size())).removeValue();
+                                    // save value to local with share reference
+                                    holder.mMainActivity.saveListActuatorToSharedPreferences(holder.mMainActivity , actuator.globalActuator_water , "actuator_water");
                                 }
                             }
                             else {Toast.makeText(holder.mMainActivity, "Can not remove this Actuator", Toast.LENGTH_SHORT).show();}

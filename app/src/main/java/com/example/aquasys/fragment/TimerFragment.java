@@ -3,6 +3,7 @@ package com.example.aquasys.fragment;
 import static android.app.Notification.EXTRA_NOTIFICATION_ID;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -11,9 +12,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -21,6 +24,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.SystemClock;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,12 +42,22 @@ import com.example.aquasys.adapter.TimerActuatorAdapter;
 import com.example.aquasys.adapter.TimerAdapter;
 import com.example.aquasys.object.actuator;
 import com.example.aquasys.object.timer;
+import com.example.aquasys.object.timervariable;
 import com.example.aquasys.system.SharedPreferencesHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.reflect.TypeToken;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoField;
+import java.util.Calendar;
+import java.util.Date;
 
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +70,11 @@ public class TimerFragment extends Fragment {
     private RecyclerView recyclerview_timer;
     private TimerAdapter timerAdapter;
     private  String selectedActuatorName;
+    private long timeDifferential ;
+    private long timeCurrent_min ;
+    private timervariable timerVariable;
+    private static final String ACTION_NOTIFY =
+            "com.example.android.timer.ACTION_NOTIFY";
 
     public TimerFragment() {
     }
@@ -198,7 +217,7 @@ public class TimerFragment extends Fragment {
                 }
 
                 // find the nearest time with the the actuator and show notification
-                int nearestActuator = findNearestActuator(actuator.globalActuator_timer, hourFrom, minuteFrom);
+                int nearestActuator = findNearestActuator(actuator.globalActuator_timer);
                 int startHour = timer.globalTimer.get(nearestActuator).getTime_start_hour();
                 int startMinute = timer.globalTimer.get(nearestActuator).getTime_start_minute();
                 String amPm;
@@ -214,7 +233,9 @@ public class TimerFragment extends Fragment {
                 }
                 @SuppressLint("DefaultLocale") String formattedTimeRange = String.format("%02d:%02d %s", startHour, startMinute, amPm);
                 selectedActuatorName = timer.globalTimer.get(nearestActuator).getAct().getName();
-                sendNotification(("Timer Set for " + selectedActuatorName), "Status : ON", formattedTimeRange);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    sendNotification(("Timer Set for " + selectedActuatorName), "Status : ON", formattedTimeRange);
+                }
                 timerAdapter.notifyDataSetChanged();
                 recyclerview_timer.setAdapter(timerAdapter);
                 mMainActivity.addScheduleToFireBase();
@@ -263,6 +284,7 @@ public class TimerFragment extends Fragment {
             is_Read = true;
         }
     }
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void sendNotification(String title, String content, String time) {
         // Get the layouts to use in the custom notification
         RemoteViews notificationLayout = new RemoteViews(requireContext().getPackageName(),
@@ -286,6 +308,9 @@ public class TimerFragment extends Fragment {
                 .setSmallIcon(R.drawable.timer)
                 .setContent(notificationLayout)
                 .setContentIntent(snoozePendingIntent) // Set the default content intent if the user taps on the notification body
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .build(); // Replace with your own notification icon
 
         // Get the notification manager
@@ -296,24 +321,80 @@ public class TimerFragment extends Fragment {
         if (notificationManager != null) {
             notificationManager.notify(NOTIFICATION_ID, notification);
         }
+
+    }
+    public void send_notification_period(){
+        Intent snoozeIntent = new Intent(requireContext(), MainActivity.class);
+        PendingIntent notifyPendingIntent = PendingIntent.getService(
+                mMainActivity, NOTIFICATION_ID, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //set alarm
+        AlarmManager alarmManager = (AlarmManager) mMainActivity.getSystemService(Context.ALARM_SERVICE);
+        @SuppressLint("SimpleDateFormat")
+        DateFormat df = new SimpleDateFormat("h:mm a");
+        String formattedTime = df.format(Calendar.getInstance().getTime());
+
+        try {
+            // Parse the formatted time
+            Date parsedDate = df.parse(formattedTime);
+
+            // Get the time in milliseconds
+            long milliseconds = parsedDate != null ? parsedDate.getTime() : 0;
+
+            // Convert milliseconds to minutes
+            timeCurrent_min = milliseconds / (60 * 1000);
+            timerVariable.getRTCWakeupTimer();
+
+            // Now 'minutes' variable contains the time in minutes
+            // You can use 'minutes' as needed
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        alarmManager.setInexactRepeating(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+                AlarmManager.INTERVAL_HALF_HOUR,
+                notifyPendingIntent);
+
+
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private long calculateTimeDifference(long hour, long minute) {
+        Instant currentTime = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            currentTime = Instant.ofEpochMilli(timerVariable.getRTCWakeupTimer());
+        }
+        Instant targetTime = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            targetTime = Instant.now()
+                    .with(ChronoField.HOUR_OF_DAY, hour)
+                    .with(ChronoField.MINUTE_OF_HOUR, minute)
+                    .with(ChronoField.SECOND_OF_MINUTE, 0)
+                    .with(ChronoField.MILLI_OF_SECOND, 0);
+        }
+
+        return Duration.between(currentTime, targetTime).toMinutes();
+
     }
 
-    private int findNearestActuator(List<actuator> actuatorList, int hour, int minute) {
+    private int findNearestActuator(List<actuator> actuatorList) {
         actuator nearestActuator = null;
         long minDifference = Long.MAX_VALUE;
 
         for (actuator actuatorItem : actuatorList) {
-            long currentDifference = calculateTimeDifference(actuatorItem.getHour(), actuatorItem.getMinute(), hour, minute);
+            long currentDifference = 0;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                currentDifference = calculateTimeDifference(actuatorItem.getHour(), actuatorItem.getMinute());
+            }
             if (currentDifference < minDifference) {
                 minDifference = currentDifference;
                 nearestActuator = actuatorItem;
             }
         }
 
+        timeDifferential = minDifference;
+
         return actuatorList.indexOf(nearestActuator);
     }
-    // Hàm tính khoảng cách thời gian giữa hai điểm thời gian (đơn vị: phút)
-    private long calculateTimeDifference(int hour1, int minute1, int hour2, int minute2) {
-        return Math.abs((hour1 * 60 + minute1) - (hour2 * 60 + minute2));
-    }
+
 }

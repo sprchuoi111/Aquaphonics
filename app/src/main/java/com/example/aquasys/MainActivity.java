@@ -1,4 +1,25 @@
 package com.example.aquasys;
+
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.net.ConnectivityManager;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,30 +29,8 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-
-import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
-import android.net.ConnectivityManager;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.example.aquasys.fragment.ActuatorFragment;
-import com.example.aquasys.network.NetworkChangeReceiver;
 import com.example.aquasys.login.Login;
+import com.example.aquasys.network.NotificationBroadcastReceiver;
 import com.example.aquasys.object.actuator;
 import com.example.aquasys.object.sensor;
 import com.example.aquasys.object.timer;
@@ -40,22 +39,21 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -68,25 +66,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int FRAGMENT_TIMER = 2;
     private static final int FRAGMENT_LOG = 3;
     private static final String CHANNEL_ID = "notify";
-    private int mCurrentFragment = FRAGMENT_SENSOR;
-    private ChipNavigationBar bottom_navi;
     private final StringBuilder text = new StringBuilder();
-    private ViewPager2 mViewPager; // Declare a ViewPager2 variable.
-    private DrawerLayout drawer_layout; // Declare a DrawerLayout variable.
     public DatabaseReference mDatabaseSensor_environment;
     public DatabaseReference mDatabaseSensor_water;
     public DatabaseReference mDatabaseActuator_environment;
     public DatabaseReference mDatabaseActuator_water;
     public DatabaseReference mDatabaseSchedule;
     public DatabaseReference mDatabaseSensor_val;
-    public DatabaseReference mDatabaseStatus_Actuator;
+    public DatabaseReference mDatabaseStatus_Actuator_environment;
+    public DatabaseReference mDatabaseStatus_Actuator_water;
     public int pos_edit_actuator;
     public actuator tmp_actuator;
-    BroadcastReceiver broadcastReceiver;
     public FirebaseFirestore db;
     public CollectionReference actuatorCollection;
     public File logFile;
+    public String email_name;
+    public FirebaseDatabase database;
 
+    //------realtime for update timer wakeup -----//
+
+
+
+    BroadcastReceiver broadcastReceiver;
+    FirebaseAuth auth;
+    FirebaseUser user;
+    private int mCurrentFragment = FRAGMENT_SENSOR;
+    private ChipNavigationBar bottom_navi;
+    private ViewPager2 mViewPager; // Declare a ViewPager2 variable.
+    private DrawerLayout drawer_layout; // Declare a DrawerLayout variable.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         // Check Internet Connection
         // create broadcast receiver
-        broadcastReceiver = new NetworkChangeReceiver();
+        broadcastReceiver = new NotificationBroadcastReceiver();
         registerNetworkBroadcastReceiver();
         // Check if the user is authenticated
         getUserInformation();
@@ -121,11 +128,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         actuatorCollection = db.collection("actuators");
         toolbar.addView(btn_update);
         btn_update.setOnClickListener(v -> {
-            addSensorToFireBase();
-            addActuatorToFireBase();
-            addScheduleToFireBase();
-            pushSensorVal();
-            Toast.makeText(MainActivity.this , "Sync data success !! ", Toast.LENGTH_SHORT).show();
+            sync_Data();
         });
 
         // Create an ActionBarDrawerToggle for syncing the ActionBar with the DrawerLayout.
@@ -138,20 +141,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigation_view.setNavigationItemSelectedListener(this);
         // Set up click events for the items in the BottomNavigationView.
         bottom_navi.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
-              @Override
-              public void onItemSelected(int id) {
-                  if (id == R.id.active_sensor) {
-                      openSensorFragment();
-                  } else if (id == R.id.active_actuator) {
-                      openActuatorFragment();
-                  } else if (id == R.id.active_timer) {
-                      openTimerFragment();
-                  }
+            @Override
+            public void onItemSelected(int id) {
+                if (id == R.id.active_sensor) {
+                    openSensorFragment();
+                } else if (id == R.id.active_actuator) {
+                    openActuatorFragment();
+                } else if (id == R.id.active_timer) {
+                    openTimerFragment();
+                }
 //                  else if (id == R.id.active_log) {
 //                      saveDataCloudtoLog();
 //                      openLogFragment();
 //                  }
-              }
+            }
         });
         // Set up a callback for ViewPager page changes.
         mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -163,17 +166,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     case 0:
                         mCurrentFragment = FRAGMENT_SENSOR; //sửa trạng thái của biến mCurrentFragment thành FRAGMENT_SENSOR
                         navigation_view.getMenu().findItem(R.id.active_sensor).setChecked(true);
-                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_sensor).getItemId(),true);
+                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_sensor).getItemId(), true);
                         break;
                     case 1:
                         mCurrentFragment = FRAGMENT_ACTUATOR; //sửa trạng thái của biến mCurrentFragment thành FRAGMENT_ACTUATOR
                         navigation_view.getMenu().findItem(R.id.active_actuator).setChecked(true);
-                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_actuator).getItemId(),true);
+                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_actuator).getItemId(), true);
                         break;
                     case 2:
                         mCurrentFragment = FRAGMENT_TIMER; //sửa trạng thái của biến mCurrentFragment thành FRAGMENT_TIMER
                         navigation_view.getMenu().findItem(R.id.active_timer).setChecked(true);
-                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_timer).getItemId(),true);
+                        bottom_navi.setItemSelected(navigation_view.getMenu().findItem(R.id.active_timer).getItemId(), true);
                         break;
 //                    case 3:
 //                        mCurrentFragment = FRAGMENT_LOG; //sửa trạng thái của biến mCurrentFragment thành FRAGMENT_TIMER
@@ -183,33 +186,47 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
+
         // database Sensor
-        mDatabaseSensor_environment = FirebaseDatabase.getInstance().getReference().child("Sensors_environment");
-        mDatabaseSensor_water = FirebaseDatabase.getInstance().getReference().child("Sensors_water");
+        mDatabaseSensor_environment = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("Sensors_environment");
+        mDatabaseSensor_water = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("Sensors_water");
         // database Actuator
-        mDatabaseActuator_environment = FirebaseDatabase.getInstance().getReference().child("Actuators").child("Actuators_environment");
-        mDatabaseActuator_water = FirebaseDatabase.getInstance().getReference().child("Actuators").child("Actuators_water");
+        mDatabaseActuator_environment = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("Actuators").child("Actuators_environment");
+        mDatabaseActuator_water = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("Actuators").child("Actuators_water");
         // database Schedule
-        mDatabaseSchedule = FirebaseDatabase.getInstance().getReference().child("Schedules");
+        mDatabaseSchedule = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("Schedules");
         // test notification
         // database for val sensor
-        mDatabaseSensor_val = FirebaseDatabase.getInstance().getReference().child("val_sensor");
-        // Assuming you have a reference to the Firebase Realtime Database
-        //get list from share references
-        actuator.globalActuator_environment = getListActuatorFromSharedPreferences(getApplicationContext() ,  "actuator_environment");
-        actuator.globalActuator_water = getListActuatorFromSharedPreferences(getApplicationContext() ,  "actuator_water");
-        timer.globalTimer = getListTimerFromSharedPreferences(getApplicationContext() , "timer");
 
+        mDatabaseSensor_val = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("controls").child("val_sensor");
+        mDatabaseStatus_Actuator_environment = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("controls").child("actuator_environment");
+        mDatabaseStatus_Actuator_water = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("controls").child("actuator_water");
+        // Assuming you have a reference to the Firebase Realtime Database
+        if (isLoginFirstTime()) {
+            setFirstTimeFlag(true);
+            sync_Data();
+        }
     }
+
+    // sync data
+
+    public void sync_Data() {
+        addSensorToFireBase();
+        addActuatorToFireBase();
+        addScheduleToFireBase();
+        pushSensorVal();
+        Toast.makeText(MainActivity.this, "Sync data success !! ", Toast.LENGTH_SHORT).show();
+    }
+
     // Manage user information
     @SuppressLint("SetTextI18n")
     private void getUserInformation() {
         // Method to check user authentication and redirect to the login page if necessary
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        FirebaseAuth auth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
+        auth = FirebaseAuth.getInstance();
         // get user
         //Firebase
-        FirebaseUser user = auth.getCurrentUser();
+        user = auth.getCurrentUser();
         // Display in the email
         NavigationView navigation_view = (NavigationView) findViewById(R.id.navigation_view);
         if (user == null) {
@@ -217,31 +234,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
             finish();
-        }
-        else {
-            String email_name = Objects.requireNonNull(user).getEmail();
+        } else {
+            email_name = Objects.requireNonNull(user).getEmail();
             TextView headerTextView = navigation_view.getHeaderView(0).findViewById(R.id.header_email); // Replace with the actual ID of your header TextView
             headerTextView.setText(email_name); // Set the text to the desired value
         }
     }
+
     // Set up the ViewPager with an adapter.
     private void setUpViewPager() {
         viewPagerAdapter mViewPagerAdapter = new viewPagerAdapter(this);
         mViewPager.setAdapter(mViewPagerAdapter);
     }
+
     // Handle item clicks in the NavigationView and synchronize with the BottomNavigationView.
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.active_sensor) {
             openSensorFragment();
-            bottom_navi.setItemSelected(id,true);
+            bottom_navi.setItemSelected(id, true);
         } else if (id == R.id.active_actuator) {
             openActuatorFragment();
-            bottom_navi.setItemSelected(id,true);
+            bottom_navi.setItemSelected(id, true);
         } else if (id == R.id.active_timer) {
             openTimerFragment();
-            bottom_navi.setItemSelected(id,true);
+            bottom_navi.setItemSelected(id, true);
         }
 //        else if (id == R.id.active_log) {
 //            saveDataCloudtoLog();
@@ -255,21 +273,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
             Toast.makeText(MainActivity.this, "Logout success", Toast.LENGTH_SHORT).show();
             finish();
-        }else if (id == R.id.change_password) {
+        } else if (id == R.id.change_password) {
             Intent intent = new Intent(getApplicationContext(), ChangePassword.class);
             startActivity(intent);
             Toast.makeText(MainActivity.this, "Return MainActivity", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.export) {
             saveDataCloudtoLog();
             // Send log file via email (replace with your email sending logic)
-            sendLogFileByEmail(logFile , "20119063@student.hcmute.edu.vn");
+            sendLogFileByEmail(logFile, "20119063@student.hcmute.edu.vn");
             Toast.makeText(MainActivity.this, "Export Complete", Toast.LENGTH_SHORT).show();
         }
 
         drawer_layout.closeDrawer(GravityCompat.START); // Close the navigation drawer.
         return true;
     }
-    public void goToSensorDevice(String nameSensor, int index , String typeSensor) { //tạo phương thức chuyển hướng Fragment từ Room sang Device
+
+    public void goToSensorDevice(String nameSensor, int index, String typeSensor) { //tạo phương thức chuyển hướng Fragment từ Room sang Device
         //tạo Intent để chuyển từ MainActivity sang Device Activity đồng thời bundle dữ liệu sang
         Intent i = new Intent(this, SensorDevice.class);
         Bundle bundle = new Bundle();
@@ -299,6 +318,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mCurrentFragment = FRAGMENT_TIMER;
         }
     }
+
     //Create method open Fragment
     //Fragment Sensor
     private void openSensorFragment() {
@@ -308,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //nếu màn hình hiện tại không ở HomeFragment thì nó sẽ chuyển sang HomeFragment đồng thời lưu giá trị tương ứng vào mCurrentFragment để kiểm tra cho các lần chọn sau
         }
     }
+
     // Fragment log
     private void openLogFragment() {
         if (mCurrentFragment != FRAGMENT_LOG) {
@@ -315,6 +336,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mCurrentFragment = FRAGMENT_LOG;
         }
     }
+
     // Handle the back button press to close the navigation drawer if it's open.
     @Override
     public void onBackPressed() {
@@ -324,11 +346,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             super.onBackPressed();
         }
     }
+
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null;
     }
+
     // save sensor to firebase
     public void addSensorToFireBase() {
         // sensor environment
@@ -347,6 +371,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
                 });
     }
+
     // save actuator to firebase
     public void addActuatorToFireBase() {
         //actuator for tree
@@ -366,6 +391,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
                 });
     }
+
     // save Schedule to firebase
     public void addScheduleToFireBase() {
         mDatabaseSchedule.setValue(timer.globalTimer).addOnSuccessListener(aVoid -> {
@@ -376,13 +402,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(MainActivity.this, "Error saving data", Toast.LENGTH_SHORT).show();
                 });
     }
+
     // MetWork processing when occur error connection
     // register Network
     protected void registerNetworkBroadcastReceiver() {
         registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
+
     // store to log active actuator to cloud fireabase
-    public void sendActuatorToFireBase_water(int position){
+    public void sendActuatorToFireBase_water(int position) {
         actuator act = actuator.globalActuator_water.get(position);
         // Create a Map with the specific fields you want to push
         Map<String, Object> actuatorData = new HashMap<>();
@@ -406,6 +434,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     // Handle failure
                 });
     }
+
     // send actuator to Firebase
     public void sendActuatorToFireBase_environment(int position) {
         actuator act = actuator.globalActuator_environment.get(position);
@@ -417,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         actuatorData.put("status", act.getStatus());
         actuatorData.put("hour", act.getHour());
         actuatorData.put("Img", act.getImg());
-        actuatorData.put("minute" ,act.getMinute());
+        actuatorData.put("minute", act.getMinute());
         // Reference to the Firestore collection
         CollectionReference actuatorCollection = FirebaseFirestore.getInstance().collection("actuators");
         // Use a specific document ID, for example, the actuator's name
@@ -430,6 +459,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     // Handle failure
                 });
     }
+
     // load file log to textview
     public StringBuilder loadAndDisplayLog() {
         try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
@@ -447,6 +477,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         return text;
     }
+
     public void saveDataCloudtoLog() {
         // Reference to the Firestore collection
         CollectionReference actuatorCollection = FirebaseFirestore.getInstance().collection("actuators");
@@ -465,7 +496,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         int status = Objects.requireNonNull(document.getLong("status")).intValue();
                         int hour = Objects.requireNonNull(document.getLong("hour")).intValue();
                         int minute = Objects.requireNonNull(document.getLong("minute")).intValue();
-                        if(status == 1 ) {
+                        if (status == 1) {
                             // Append data to StringBuilder
                             logData.append(time)
                                     .append(" Name: ").append(name)
@@ -473,8 +504,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     .append(", Status: ").append(status)
                                     .append(", Duration : ").append(hour).append("h:").append(minute).append("min")
                                     .append("\n");
-                        }
-                        else {
+                        } else {
                             // Append data to StringBuilder
                             logData.append(time)
                                     .append(" Name: ").append(name)
@@ -530,6 +560,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(Intent.createChooser(emailIntent, "Send email..."));
 
     }
+
     protected void unregisterNetwork() {
         try {
             unregisterReceiver(broadcastReceiver);
@@ -537,13 +568,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unregisterNetwork();
     }
+
     // push val sensor to firebase
-    public void pushSensorVal(){
+    public void pushSensorVal() {
         mDatabaseSensor_val.child("Humi").setValue(sensor.globalSensor_enviroment.get(0).getValue());
         mDatabaseSensor_val.child("Temp").setValue(sensor.globalSensor_enviroment.get(1).getValue());
         mDatabaseSensor_val.child("Light").setValue(sensor.globalSensor_enviroment.get(2).getValue());
@@ -551,71 +584,101 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDatabaseSensor_val.child("pH").setValue(sensor.globalSensor_water.get(0).getValue());
         mDatabaseSensor_val.child("Water_level").setValue(sensor.globalSensor_water.get(1).getValue());
     }
+
     // get actuator list
-    public static List<actuator> getListActuatorFromSharedPreferences(Context context , String actuator_type) {
+    public List<actuator> getListActuatorFromSharedPreferences(Context context, String actuator_type) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String actuatorJson = sharedPreferences.getString(actuator_type, "");
 
         if (!actuatorJson.isEmpty()) {
-            Type type = new TypeToken<List<actuator>>() {}.getType();
+            Type type = new TypeToken<List<actuator>>() {
+            }.getType();
             return new Gson().fromJson(actuatorJson, type);
         }
 
+        Toast.makeText(context, "get actuator", Toast.LENGTH_SHORT).show();
         return new ArrayList<>(); // Return an empty list if no data is found
     }
+
     // add list  actuator to local
-    public static void saveListActuatorToSharedPreferences(Context context, List<actuator> actuatorList, String save_name) {
+    public void saveListActuatorToSharedPreferences(Context context, List<actuator> actuatorList, String save_name) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String actuatorJson = new Gson().toJson(actuatorList);
         editor.putString(save_name, actuatorJson);
         editor.apply();
     }
+
     // for the schedule
-    public static List<timer> getListTimerFromSharedPreferences(Context context , String timer_type) {
+    public List<timer> getListTimerFromSharedPreferences(Context context, String timer_type) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String timerJson = sharedPreferences.getString(timer_type, "");
 
         if (!timerJson.isEmpty()) {
-            Type type = new TypeToken<List<timer>>() {}.getType();
+            Type type = new TypeToken<List<timer>>() {
+            }.getType();
             return new Gson().fromJson(timerJson, type);
         }
 
         return new ArrayList<>(); // Return an empty list if no data is found
     }
+
     // add list  actuator to local
-    public static void saveListTimerToSharedPreferences(Context context, List<actuator> timerList, String save_name) {
+    public void saveListTimerToSharedPreferences(Context context, List<actuator> timerList, String save_name) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String actuatorJson = new Gson().toJson(timerList);
         editor.putString(save_name, actuatorJson);
         editor.apply();
     }
+
     // for the actuator
-    public static List<sensor> getListSensorFromSharedPreferences(Context context , String sensor_type) {
+    public List<sensor> getListSensorFromSharedPreferences(Context context, String sensor_type) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String sensorJson = sharedPreferences.getString(sensor_type, "");
 
         if (!sensorJson.isEmpty()) {
-            Type type = new TypeToken<List<sensor>>() {}.getType();
+            Type type = new TypeToken<List<sensor>>() {
+            }.getType();
             return new Gson().fromJson(sensorJson, type);
         }
 
         return new ArrayList<>(); // Return an empty list if no data is found
     }
+
     // add list  actuator to local
-    public static void saveListSensorToSharedPreferences(Context context, List<actuator> sensorList, String save_name) {
+    public void saveListSensorToSharedPreferences(Context context, List<actuator> sensorList, String save_name) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String sensorJson = new Gson().toJson(sensorList);
         editor.putString(save_name, sensorJson);
         editor.apply();
     }
-    public static void pushActuatorListToFirebase(List<actuator> actuatorList) {
+
+    public void pushActuatorListToFirebase(List<actuator> actuatorList) {
         // Push actuatorList to Firebase using your preferred method
         // Example: mDatabaseActuatorWater.setValue(actuatorList);
     }
 
+    private boolean isLoginFirstTime() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return sharedPreferences.getBoolean(user.getUid(), true);
+    }
 
+    private void setFirstTimeFlag(boolean value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(user.getUid(), value);
+        editor.apply();
+    }
+    public  void get_RTCWakeup_timer(){
+        Date currentTime = Calendar.getInstance().getTime();
+
+
+    }
+    //start service
+    public void startService(View v){
+
+    }
 
 }

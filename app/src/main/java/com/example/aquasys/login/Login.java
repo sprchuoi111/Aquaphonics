@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.aquasys.MainActivity;
 import com.example.aquasys.R;
+import com.example.aquasys.object.sensor;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
@@ -76,12 +77,13 @@ public class Login extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     // set the progressbar gone when the task login is completing
-                                    login_progressbar.setVisibility(View.GONE);
+
                                     if (task.isSuccessful()) {
                                         // Toast popup login success and go to main page
                                         Toast.makeText(Login.this, " Login success", Toast.LENGTH_SHORT).show();
                                         intent = new Intent(getApplicationContext(), MainActivity.class);
                                         startActivity(intent);
+                                        login_progressbar.setVisibility(View.GONE);
                                         finish();
                                     } else {
                                         // If sign in fails, display a message to the user.

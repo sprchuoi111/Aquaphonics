@@ -105,7 +105,7 @@ public class ActuatorFragment extends Fragment {
 //        Read_Data_fromFireBase_Actuator_Tree();
 //        Read_Data_fromFireBase_Actuator_Fish();
         //initialize view pager
-        setUpViewPager_adapter();
+
 
         // Set up click events for the items in the BottomNavigationView.
         navi_menu_actuator.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -122,15 +122,17 @@ public class ActuatorFragment extends Fragment {
         });
         // get list actuator
         //for the Actuator environment
-        List<actuator> retrievedActuatorList_environment = com.example.aquasys.system.SharedPreferencesHelper.getListFromSharedPreferences(mMainActivity, "actuator_environment", new TypeToken<List<actuator>>() {
-        });
-        if (retrievedActuatorList_environment == null)
+        actuator.globalActuator_environment = mMainActivity.getListActuatorFromSharedPreferences(mMainActivity , "actuator_environment");
+        if (actuator.globalActuator_environment.isEmpty())
             Read_Data_fromFireBase_Actuator_Tree();
         // for the Actuator water
-        List<actuator> retrievedActuatorList_water = com.example.aquasys.system.SharedPreferencesHelper.getListFromSharedPreferences(mMainActivity, "actuator_water", new TypeToken<List<actuator>>() {
-        });
-        if (retrievedActuatorList_water == null)
+        actuator.globalActuator_water = mMainActivity.getListActuatorFromSharedPreferences(mMainActivity , "actuator_water");
+        if (actuator.globalActuator_water.isEmpty())
             Read_Data_fromFireBase_Actuator_Fish();
+
+        //setting up viewpager
+        setUpViewPager_adapter();
+
         return mView;
     }
     // Set up the ViewPager with an adapter.
@@ -172,6 +174,7 @@ public class ActuatorFragment extends Fragment {
                     }
                 }
                 actuator.globalActuator_environment = actuatorList;
+                Toast.makeText(mMainActivity, "get list complete !", Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {

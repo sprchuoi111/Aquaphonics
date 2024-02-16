@@ -60,17 +60,15 @@ public class fragment_actuator_environment extends Fragment {
         btn_edit_actuator_tree = mView.findViewById(R.id.btn_edit_actuator_tree);
         btn_menu_actuator_tree = mView.findViewById(R.id.btn_menu_actuator_tree);
         mMainActivity = (MainActivity) getActivity(); // Get a reference to the hosting Activity (assumed to be MainActivity).
-        // update the value of the text in device
-        SharedPreferencesHelper SharedPreferencesHelper;
-        // check for loading actuator environment
 
-        Read_Data_fromFireBase_Actuator_Tree();
         recyclerview_adapter_environment = mView.findViewById(R.id.recyclerview_adapter_environment); // Find the RecyclerView in the layout.
         tv_number_actuator_environment =  mView.findViewById(R.id.tv_number_actuator_environment);
+        // check for loading actuator environment
+        Read_Data_fromFireBase_Actuator_Tree();
         //Setting GridLayoutManager with 2 columns for environment
         recyclerview_adapter_environment.setLayoutManager(new GridLayoutManager(mMainActivity, 2));
         // Assuming there is a similar list for environment actuators
-        int environmentActuatorSize = actuator.listActuator_environment() != null ? actuator.listActuator_environment().size() : 0;
+        int environmentActuatorSize = actuator.listActuator_environment() != null ? actuator.globalActuator_environment.size() : 0;
         tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
         // set list for sensor adapter
         // Now set all the FABs and all the action name
@@ -223,34 +221,13 @@ public class fragment_actuator_environment extends Fragment {
         return mView;
     }
     // Read data of actuator tree
+    @SuppressLint("SetTextI18n")
     public void Read_Data_fromFireBase_Actuator_Tree(){
-            mMainActivity.mDatabaseActuator_environment.addListenerForSingleValueEvent(new ValueEventListener() {
-                @SuppressLint({"NotifyDataSetChanged", "SetTextI18n"})
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    List<actuator> actuatorList = new ArrayList<>();
-                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                        actuator act = dataSnapshot.getValue(actuator.class);
-                        // check inform in actuator list not return null
-                        if (act != null) {
-                            actuatorList.add(act);
-                        }
-                    }
-                    // test for reading
-                    //Toast.makeText(mMainActivity, "Read success", Toast.LENGTH_SHORT).show();
-                    actuator.globalActuator_environment = actuatorList;
-                    // notify data change for the actuator lis
-                    actuatorAdapter_environment = new ActuatorAdapter_environment(actuator.globalActuator_environment, (act, position) -> {
-                    });
-                    recyclerview_adapter_environment.setAdapter(actuatorAdapter_environment);
-                    int environmentActuatorSize = actuator.globalActuator_environment.size();
-                     tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(mMainActivity, "Error when reading data", Toast.LENGTH_SHORT).show();
-                }
-            });
+        actuatorAdapter_environment = new ActuatorAdapter_environment(actuator.globalActuator_environment, (act, position) -> {
+        });
+        recyclerview_adapter_environment.setAdapter(actuatorAdapter_environment);
+        int environmentActuatorSize = actuator.globalActuator_environment.size();
+        tv_number_actuator_environment.setText(environmentActuatorSize + " Devices");
         mMainActivity.mDatabaseActuator_environment.addValueEventListener(new ValueEventListener() {
             @SuppressLint({"NotifyDataSetChanged", "SetTextI18n"})
             @Override

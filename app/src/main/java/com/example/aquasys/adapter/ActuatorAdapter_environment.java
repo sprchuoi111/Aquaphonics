@@ -323,6 +323,8 @@ public class ActuatorAdapter_environment extends RecyclerView.Adapter<ActuatorAd
                                     if(itemPosition != actuatorList.size())
                                         //remove the last item in firebase
                                         holder.mMainActivity.mDatabaseActuator_environment.child(String.valueOf(actuatorList.size())).removeValue();
+                                    // save value to local with share reference
+                                    holder.mMainActivity.saveListActuatorToSharedPreferences(holder.mMainActivity , actuator.globalActuator_environment , "actuator_environment");
                                 }
                             }
                             else {Toast.makeText(holder.mMainActivity, "Can not remove this Actuator", Toast.LENGTH_SHORT).show();
