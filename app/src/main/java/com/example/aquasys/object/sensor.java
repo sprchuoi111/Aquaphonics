@@ -24,29 +24,22 @@ public class sensor {
     enum typeofsensor{
         humidity,
         temp,
-        soil_moisture,
+        gas,
         light,
-        ph ,
-        level_water
+        CO,
+        CO2
     }
     //no-argument constructor
     public sensor(){}
 
-    public sensor(String name,String value, int img , typeofsensor type , String id) {
+    public sensor(String name,String value, int img , typeofsensor type) {
         this.name = name;
         this.value = value;
         this.img = img;
         this.type = type;
-        this.id = id;
     }
 
-    public String getId() {
-        return id;
-    }
 
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public static List<sensor> getGlobalSensor_enviroment() {
         return globalSensor_enviroment;
@@ -55,15 +48,6 @@ public class sensor {
     public static void setGlobalSensor_enviroment(List<sensor> globalSensor_enviroment) {
         sensor.globalSensor_enviroment = globalSensor_enviroment;
     }
-
-    public static List<sensor> getGlobalSensor_water() {
-        return globalSensor_water;
-    }
-
-    public static void setGlobalSensor_water(List<sensor> globalSensor_water) {
-        sensor.globalSensor_water = globalSensor_water;
-    }
-
     public String getName() {
         return name;
     }
@@ -95,30 +79,38 @@ public class sensor {
     public void setStatus(int status) {
         this.status = status;
     }
-    // sensor list for fish
     public static  List<sensor> globalSensor_enviroment = new ArrayList<>();
-    // sensor list for tree
-    public static  List<sensor> globalSensor_water = new ArrayList<>();
-
-
+    public int getImageResource(String sensorName) {
+        switch (sensorName) {
+            case "Humidity":
+                return R.drawable.humidity_percentage;
+            case "CO2":
+                return R.drawable.co2;
+            case "Temperature":
+                return R.drawable.device_thermostat;
+            case "Water level":
+                return R.drawable.water_level;
+            case "Moisture Soil":
+                return R.drawable.soil;
+            case "Co2":
+                return R.drawable.co2;
+            case "Spo2":
+                return R.drawable.spo2;
+            case "Light":
+                return R.drawable.light_mode;
+            default:
+                return R.drawable.sensors;
+        }
+    }
     // sensor list for aqua
     public static List<sensor> listSensor_environment() {
         if (globalSensor_enviroment.isEmpty()) {
-            globalSensor_enviroment.add(new sensor("Humidity", "-1", R.drawable.humidity_percentage, typeofsensor.humidity , "ENS00001"));
-            globalSensor_enviroment.add(new sensor("Temperature", "-1", R.drawable.device_thermostat, typeofsensor.temp ,"ENS00002"));
-            globalSensor_enviroment.add(new sensor("Light Sensor", "-1", R.drawable.light_mode, typeofsensor.light, "ENS00003"));
-            globalSensor_enviroment.add(new sensor("Moisture Humi", "-1", R.drawable.soil, typeofsensor.soil_moisture , "ENS00004"));
-
+            globalSensor_enviroment.add(new sensor("Humidity", "-1", R.drawable.humidity_percentage, typeofsensor.humidity));
+            globalSensor_enviroment.add(new sensor("Temperature", "-1", R.drawable.device_thermostat, typeofsensor.temp));
+            globalSensor_enviroment.add(new sensor("Light Sensor", "-1", R.drawable.light_mode, typeofsensor.light));
+            globalSensor_enviroment.add(new sensor("Gas Sensor", "-1", R.drawable.soil, typeofsensor.gas));
         }
         return globalSensor_enviroment;
-    }
-    // sensor list for hydro
-    public static List<sensor> listSensor_water() {
-        if (globalSensor_water.isEmpty()) {
-            globalSensor_water.add(new sensor("PH","-1", R.drawable.ph , typeofsensor.ph , "WTS00001"));
-            globalSensor_water.add(new sensor("Water Level", "-1",R.drawable.water_level , typeofsensor.level_water , "WTS00002"));
-        }
-        return globalSensor_water;
     }
 
 }

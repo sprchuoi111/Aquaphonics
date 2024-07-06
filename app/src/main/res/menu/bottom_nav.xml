@@ -8,13 +8,8 @@
         android:icon="@drawable/sensors"
         app:cnb_iconColor="#2196F3"/>
     <item
-        android:id="@+id/active_actuator"
-        android:title="@string/actuator"
+        android:id="@+id/active_FUOTA"
+        android:title="@string/FUOTA"
         android:icon="@drawable/relay"
-        app:cnb_iconColor="#2196F3"/>
-    <item
-        android:id="@+id/active_timer"
-        android:title="@string/timer"
-        android:icon="@drawable/timer"
         app:cnb_iconColor="#2196F3"/>
 </menu>

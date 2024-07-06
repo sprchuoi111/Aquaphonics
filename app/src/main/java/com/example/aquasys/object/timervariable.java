@@ -1,5 +1,7 @@
 package com.example.aquasys.object;
 
+import android.os.SystemClock;
+
 import java.util.Calendar;
 
 public class timervariable {
@@ -19,5 +21,12 @@ public class timervariable {
         // Convert the result to minus (subtract the current time from the added time)
         RTC_Wakeup_timer = RTC_Wakeup_timer - System.currentTimeMillis();
         return  RTC_Wakeup_timer;
+    }
+    public long getCurrentTimeInMinutes() {
+        // get time in realtime
+        long currentTimeInMillis = SystemClock.elapsedRealtime();
+
+        // Convert  current millisecond to minus
+        return currentTimeInMillis / 60000;
     }
 }

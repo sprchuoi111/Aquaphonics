@@ -32,19 +32,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/recyclerview_sensor_environment"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tv_sensor_water"
-        android:text="@string/water_quality_monitor"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:textColor="@color/black"/>
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/recyclerview_sensor_water"/>
+        android:id="@+id/recyclerview_node_sensor"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
